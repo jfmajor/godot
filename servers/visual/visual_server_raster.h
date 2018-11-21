@@ -511,7 +511,7 @@ public:
 	BIND6(environment_set_adjustment, RID, bool, float, float, float, RID)
 
 	BIND5(environment_set_fog, RID, bool, const Color &, const Color &, float)
-	BIND6(environment_set_fog_depth, RID, bool, float, float, bool, float)
+	BIND7(environment_set_fog_depth, RID, bool, float, float, float, bool, float)
 	BIND5(environment_set_fog_height, RID, bool, float, float, float)
 
 	/* SCENARIO API */
@@ -599,7 +599,7 @@ public:
 	BIND10(canvas_item_add_triangle_array, RID, const Vector<int> &, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, const Vector<int> &, const Vector<float> &, RID, int, RID)
 	BIND4(canvas_item_add_mesh, RID, const RID &, RID, RID)
 	BIND4(canvas_item_add_multimesh, RID, RID, RID, RID)
-	BIND6(canvas_item_add_particles, RID, RID, RID, RID, int, int)
+	BIND4(canvas_item_add_particles, RID, RID, RID, RID)
 	BIND2(canvas_item_add_set_transform, RID, const Transform2D &)
 	BIND2(canvas_item_add_clip_ignore, RID, bool)
 	BIND2(canvas_item_set_sort_children_by_y, RID, bool)

@@ -210,6 +210,9 @@ void ScriptEditorQuickOpen::_notification(int p_what) {
 			search_box->set_right_icon(get_icon("Search", "EditorIcons"));
 			search_box->set_clear_button_enabled(true);
 		} break;
+		case NOTIFICATION_EXIT_TREE: {
+			disconnect("confirmed", this, "_confirmed");
+		} break;
 	}
 }
 
@@ -978,7 +981,7 @@ void ScriptEditor::_menu_option(int p_option) {
 		} break;
 		case SEARCH_WEBSITE: {
 
-			OS::get_singleton()->shell_open("http://docs.godotengine.org/");
+			OS::get_singleton()->shell_open("https://docs.godotengine.org/");
 		} break;
 
 		case WINDOW_NEXT: {
@@ -2892,7 +2895,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	restoring_layout = false;
 	waiting_update_names = false;
 	pending_auto_reload = false;
-	auto_reload_running_scripts = false;
+	auto_reload_running_scripts = true;
 	members_overview_enabled = EditorSettings::get_singleton()->get("text_editor/open_scripts/show_members_overview");
 	help_overview_enabled = EditorSettings::get_singleton()->get("text_editor/help/show_help_index");
 	editor = p_editor;

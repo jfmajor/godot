@@ -272,7 +272,6 @@ private:
 
 	Ref<Theme> theme;
 
-	EditorDefaultClassValueCache *default_value_cache;
 	PopupMenu *recent_scenes;
 	SceneTreeDock *scene_tree_dock;
 	InspectorDock *inspector_dock;
@@ -357,6 +356,7 @@ private:
 	EditorExport *editor_export;
 
 	Object *current;
+	Ref<Resource> saving_resource;
 
 	bool _playing_edited;
 	String run_custom_filename;
@@ -605,6 +605,8 @@ private:
 
 	static void _resource_saved(RES p_resource, const String &p_path);
 	static void _resource_loaded(RES p_resource, const String &p_path);
+
+	void _resources_changed(const PoolVector<String> &p_resources);
 
 protected:
 	void _notification(int p_what);
