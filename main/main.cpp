@@ -1587,7 +1587,8 @@ bool Main::start() {
 
 			if (_export_preset != "") {
 
-				editor_node->export_preset(_export_preset, game_path, export_debug, "", true);
+                EditorResourcePreview::get_singleton()->disable_previews();
+                editor_node->export_preset(_export_preset, game_path, export_debug, "", true);
 				game_path = ""; //no load anything
 			}
 		}
