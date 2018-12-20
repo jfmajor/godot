@@ -301,7 +301,7 @@ private:
 	void _update_all_lines();
 
 	int fixed_width;
-
+	bool auto_resize_to_text;
 protected:
 	void _notification(int p_what);
 
@@ -380,6 +380,9 @@ public:
 
 	void set_fixed_size_to_width(int p_width);
 	virtual Size2 get_minimum_size() const;
+
+	void set_auto_resize_to_text(bool p_autoresize);
+	bool is_auto_resize_to_text() const;
 
 	RichTextLabel();
 	~RichTextLabel();

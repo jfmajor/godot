@@ -2228,6 +2228,9 @@ void RichTextLabel::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_content_height"), &RichTextLabel::get_content_height);
 
+    ClassDB::bind_method(D_METHOD("set_auto_resize_to_text", "width"), &RichTextLabel::set_auto_resize_to_text);
+    ClassDB::bind_method(D_METHOD("is_auto_resize_to_text"), &RichTextLabel::is_auto_resize_to_text);
+
 	ADD_GROUP("BBCode", "bbcode_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bbcode_enabled"), "set_use_bbcode", "is_using_bbcode");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "bbcode_text", PROPERTY_HINT_MULTILINE_TEXT), "set_bbcode", "get_bbcode");
@@ -2244,6 +2247,8 @@ void RichTextLabel::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "selection_enabled"), "set_selection_enabled", "is_selection_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "override_selected_font_color"), "set_override_selected_font_color", "is_overriding_selected_font_color");
+
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_resize_to_text"), "set_auto_resize_to_text", "is_auto_resize_to_text");
 
 	ADD_SIGNAL(MethodInfo("meta_clicked", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
 	ADD_SIGNAL(MethodInfo("meta_hover_started", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
@@ -2302,8 +2307,21 @@ Size2 RichTextLabel::get_minimum_size() const {
 		const_cast<RichTextLabel *>(this)->_validate_line_caches(main);
 		return Size2(fixed_width, const_cast<RichTextLabel *>(this)->get_content_height());
 	}
+    else if (auto_resize_to_text) {
+        const_cast<RichTextLabel *>(this)->_validate_line_caches(main);
+        return Size2(const_cast<RichTextLabel *>(this)->get_custom_minimum_size().x, const_cast<RichTextLabel *>(this)->get_content_height());
+    }
 
 	return Size2();
+}
+
+void RichTextLabel::set_auto_resize_to_text(bool p_autoresize) {
+    auto_resize_to_text = p_autoresize;
+    minimum_size_changed();
+}
+
+bool RichTextLabel::is_auto_resize_to_text() const {
+    return auto_resize_to_text;
 }
 
 RichTextLabel::RichTextLabel() {
@@ -2347,6 +2365,8 @@ RichTextLabel::RichTextLabel() {
 	visible_characters = -1;
 	percent_visible = 1;
 	visible_line_count = 0;
+
+	auto_resize_to_text = false;
 
 	fixed_width = -1;
 	set_clip_contents(true);
