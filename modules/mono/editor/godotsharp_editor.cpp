@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -248,8 +248,19 @@ Error GodotSharpEditor::open_in_external_editor(const Ref<Script> &p_script, int
 			static String vscode_path;
 
 			if (vscode_path.empty() || !FileAccess::exists(vscode_path)) {
+				static List<String> vscode_name;
+				vscode_name.push_back("code");
+				vscode_name.push_back("code-oss");
+				vscode_name.push_back("vscode");
+				vscode_name.push_back("vscode-oss");
+				vscode_name.push_back("visual-studio-code");
+				vscode_name.push_back("visual-studio-code-oss");
 				// Try to search it again if it wasn't found last time or if it was removed from its location
-				vscode_path = path_which("code");
+				for (int i = 0; i < vscode_name.size(); i++) {
+					vscode_path = path_which(vscode_name[i]);
+					if (!vscode_path.empty() || FileAccess::exists(vscode_path))
+						break;
+				}
 			}
 
 			List<String> args;
@@ -475,7 +486,9 @@ MonoReloadNode *MonoReloadNode::singleton = NULL;
 
 void MonoReloadNode::_reload_timer_timeout() {
 
-	CSharpLanguage::get_singleton()->reload_assemblies_if_needed(false);
+	if (CSharpLanguage::get_singleton()->is_assembly_reloading_needed()) {
+		CSharpLanguage::get_singleton()->reload_assemblies(false);
+	}
 }
 
 void MonoReloadNode::restart_reload_timer() {
@@ -493,7 +506,9 @@ void MonoReloadNode::_notification(int p_what) {
 	switch (p_what) {
 		case MainLoop::NOTIFICATION_WM_FOCUS_IN: {
 			restart_reload_timer();
-			CSharpLanguage::get_singleton()->reload_assemblies_if_needed(true);
+			if (CSharpLanguage::get_singleton()->is_assembly_reloading_needed()) {
+				CSharpLanguage::get_singleton()->reload_assemblies(false);
+			}
 		} break;
 		default: {
 		} break;

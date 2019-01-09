@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -87,6 +87,7 @@ public:
 		Map<Vector2, Ref<OccluderPolygon2D> > occluder_map;
 		Map<Vector2, Ref<NavigationPolygon> > navpoly_map;
 		Map<Vector2, int> priority_map;
+		Map<Vector2, int> z_index_map;
 
 		// Default size to prevent invalid value
 		explicit AutotileData() :
@@ -171,6 +172,10 @@ public:
 	void autotile_set_subtile_priority(int p_id, const Vector2 &p_coord, int p_priority);
 	int autotile_get_subtile_priority(int p_id, const Vector2 &p_coord);
 	const Map<Vector2, int> &autotile_get_priority_map(int p_id) const;
+
+	void autotile_set_z_index(int p_id, const Vector2 &p_coord, int p_z_index);
+	int autotile_get_z_index(int p_id, const Vector2 &p_coord);
+	const Map<Vector2, int> &autotile_get_z_index_map(int p_id) const;
 
 	void autotile_set_bitmask(int p_id, Vector2 p_coord, uint16_t p_flag);
 	uint16_t autotile_get_bitmask(int p_id, Vector2 p_coord);

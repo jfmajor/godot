@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -131,7 +131,6 @@ const char *ShaderLanguage::token_names[TK_MAX] = {
 	"TYPE_USAMPLER3D",
 	"TYPE_SAMPLERCUBE",
 	"INTERPOLATION_FLAT",
-	"INTERPOLATION_NO_PERSPECTIVE",
 	"INTERPOLATION_SMOOTH",
 	"PRECISION_LOW",
 	"PRECISION_MID",
@@ -271,7 +270,6 @@ const ShaderLanguage::KeyWord ShaderLanguage::keyword_list[] = {
 	{ TK_TYPE_USAMPLER3D, "usampler3D" },
 	{ TK_TYPE_SAMPLERCUBE, "samplerCube" },
 	{ TK_INTERPOLATION_FLAT, "flat" },
-	{ TK_INTERPOLATION_NO_PERSPECTIVE, "noperspective" },
 	{ TK_INTERPOLATION_SMOOTH, "smooth" },
 	{ TK_PRECISION_LOW, "lowp" },
 	{ TK_PRECISION_MID, "mediump" },
@@ -527,7 +525,6 @@ ShaderLanguage::Token ShaderLanguage::_get_token() {
 					bool exponent_found = false;
 					bool hexa_found = false;
 					bool sign_found = false;
-					bool minus_exponent_found = false;
 					bool float_suffix_found = false;
 
 					String str;
@@ -559,8 +556,6 @@ ShaderLanguage::Token ShaderLanguage::_get_token() {
 							if (sign_found)
 								return _make_token(TK_ERROR, "Invalid numeric constant");
 							sign_found = true;
-							if (GETCHAR(i) == '-')
-								minus_exponent_found = true;
 						} else
 							break;
 
@@ -573,7 +568,7 @@ ShaderLanguage::Token ShaderLanguage::_get_token() {
 					if (hexa_found) {
 						//hex integers eg."0xFF" or "0x12AB", etc - NOT supported yet
 						return _make_token(TK_ERROR, "Invalid (hexadecimal) numeric constant - Not supported");
-					} else if (period_found || float_suffix_found) {
+					} else if (period_found || exponent_found || float_suffix_found) {
 						//floats
 						if (period_found) {
 							if (float_suffix_found) {
@@ -616,7 +611,7 @@ ShaderLanguage::Token ShaderLanguage::_get_token() {
 
 					char_idx += str.length();
 					Token tk;
-					if (period_found || minus_exponent_found || float_suffix_found)
+					if (period_found || exponent_found || float_suffix_found)
 						tk.type = TK_REAL_CONSTANT;
 					else
 						tk.type = TK_INT_CONSTANT;
@@ -759,7 +754,6 @@ bool ShaderLanguage::is_token_interpolation(TokenType p_type) {
 
 	return (
 			p_type == TK_INTERPOLATION_FLAT ||
-			p_type == TK_INTERPOLATION_NO_PERSPECTIVE ||
 			p_type == TK_INTERPOLATION_SMOOTH);
 }
 
@@ -767,8 +761,6 @@ ShaderLanguage::DataInterpolation ShaderLanguage::get_token_interpolation(TokenT
 
 	if (p_type == TK_INTERPOLATION_FLAT)
 		return INTERPOLATION_FLAT;
-	else if (p_type == TK_INTERPOLATION_NO_PERSPECTIVE)
-		return INTERPOLATION_NO_PERSPECTIVE;
 	else
 		return INTERPOLATION_SMOOTH;
 }
@@ -1220,6 +1212,15 @@ bool ShaderLanguage::_validate_operator(OperatorNode *p_op, DataType *r_ret_type
 			} else if (p_op->op == OP_ASSIGN_MUL && na == TYPE_MAT4 && nb == TYPE_VEC4) {
 				valid = true;
 				ret_type = TYPE_MAT4;
+			} else if (p_op->op == OP_ASSIGN_MUL && na == TYPE_VEC2 && nb == TYPE_MAT2) {
+				valid = true;
+				ret_type = TYPE_VEC2;
+			} else if (p_op->op == OP_ASSIGN_MUL && na == TYPE_VEC3 && nb == TYPE_MAT3) {
+				valid = true;
+				ret_type = TYPE_VEC3;
+			} else if (p_op->op == OP_ASSIGN_MUL && na == TYPE_VEC4 && nb == TYPE_MAT4) {
+				valid = true;
+				ret_type = TYPE_VEC4;
 			}
 		} break;
 		case OP_ASSIGN_BIT_AND:

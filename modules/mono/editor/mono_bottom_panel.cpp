@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -154,10 +154,14 @@ void MonoBottomPanel::_build_project_pressed() {
 	Error metadata_err = CSharpProject::generate_scripts_metadata(GodotSharpDirs::get_project_csproj_path(), scripts_metadata_path);
 	ERR_FAIL_COND(metadata_err != OK);
 
-	GodotSharpBuilds::get_singleton()->build_project_blocking("Tools");
+	bool build_success = GodotSharpBuilds::get_singleton()->build_project_blocking("Tools");
 
-	MonoReloadNode::get_singleton()->restart_reload_timer();
-	CSharpLanguage::get_singleton()->reload_assemblies_if_needed(true);
+	if (build_success) {
+		MonoReloadNode::get_singleton()->restart_reload_timer();
+		if (CSharpLanguage::get_singleton()->is_assembly_reloading_needed()) {
+			CSharpLanguage::get_singleton()->reload_assemblies(false);
+		}
+	}
 }
 
 void MonoBottomPanel::_view_log_pressed() {

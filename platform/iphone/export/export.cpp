@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -98,6 +98,70 @@ class EditorExportPlatformIOS : public EditorExportPlatform {
 	void _add_assets_to_project(Vector<uint8_t> &p_project_data, const Vector<IOSExportAsset> &p_additional_assets);
 	Error _export_additional_assets(const String &p_out_dir, const Vector<String> &p_assets, bool p_is_framework, Vector<IOSExportAsset> &r_exported_assets);
 	Error _export_additional_assets(const String &p_out_dir, const Vector<SharedObject> &p_libraries, Vector<IOSExportAsset> &r_exported_assets);
+
+	bool is_package_name_valid(const String &p_package, String *r_error = NULL) const {
+
+		String pname = p_package;
+
+		if (pname.length() == 0) {
+			if (r_error) {
+				*r_error = "Identifier is missing.";
+			}
+			return false;
+		}
+
+		int segments = 0;
+		bool first = true;
+		for (int i = 0; i < pname.length(); i++) {
+			CharType c = pname[i];
+			if (first && c == '.') {
+				if (r_error) {
+					*r_error = "Identifier segments must be of non-zero length.";
+				}
+				return false;
+			}
+			if (c == '.') {
+				segments++;
+				first = true;
+				continue;
+			}
+			if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
+				if (r_error) {
+					*r_error = "The character '" + String::chr(c) + "' is not allowed in Identifier.";
+				}
+				return false;
+			}
+			if (first && (c >= '0' && c <= '9')) {
+				if (r_error) {
+					*r_error = "A digit cannot be the first character in a Identifier segment.";
+				}
+				return false;
+			}
+			if (first && c == '_') {
+				if (r_error) {
+					*r_error = "The character '" + String::chr(c) + "' cannot be the first character in a Identifier segment.";
+				}
+				return false;
+			}
+			first = false;
+		}
+
+		if (segments == 0) {
+			if (r_error) {
+				*r_error = "The Identifier must have at least one '.' separator.";
+			}
+			return false;
+		}
+
+		if (first) {
+			if (r_error) {
+				*r_error = "Identifier segments must be of non-zero length.";
+			}
+			return false;
+		}
+
+		return true;
+	}
 
 protected:
 	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features);
@@ -982,11 +1046,33 @@ bool EditorExportPlatformIOS::can_export(const Ref<EditorExportPreset> &p_preset
 		err += "Custom release package not found.\n";
 	}
 
+	String team_id = p_preset->get("application/app_store_team_id");
+	if (team_id.length() == 0) {
+		err += "App Store Team ID not specified - cannot configure the project.\n";
+	}
+
+	String identifier = p_preset->get("application/identifier");
+	String pn_err;
+	if (!is_package_name_valid(identifier, &pn_err)) {
+		err += "Invalid Identifier - " + pn_err + "\n";
+	}
+
+	for (unsigned int i = 0; i < (sizeof(icon_infos) / sizeof(icon_infos[0])); ++i) {
+		IconInfo info = icon_infos[i];
+		String icon_path = p_preset->get(info.preset_key);
+		if (icon_path.length() == 0) {
+			if (info.is_required) {
+				err += "Required icon is not specified in the preset.\n";
+			}
+			break;
+		}
+	}
+
 	if (!err.empty())
 		r_error = err;
 
 	r_missing_templates = !valid;
-	return valid;
+	return err.empty();
 }
 
 EditorExportPlatformIOS::EditorExportPlatformIOS() {

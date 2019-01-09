@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -194,13 +194,12 @@ void AudioDriverRtAudio::finish() {
 	}
 }
 
-AudioDriverRtAudio::AudioDriverRtAudio() {
-
-	active = false;
-	mutex = NULL;
-	dac = NULL;
-	mix_rate = DEFAULT_MIX_RATE;
-	speaker_mode = SPEAKER_MODE_STEREO;
+AudioDriverRtAudio::AudioDriverRtAudio() :
+		speaker_mode(SPEAKER_MODE_STEREO),
+		mutex(NULL),
+		dac(NULL),
+		mix_rate(DEFAULT_MIX_RATE),
+		active(false) {
 }
 
 #endif

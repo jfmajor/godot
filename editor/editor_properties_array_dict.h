@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -93,6 +93,9 @@ class EditorPropertyArray : public EditorProperty {
 	EditorSpinSlider *page;
 	HBoxContainer *page_hb;
 	Variant::Type array_type;
+	Variant::Type subtype;
+	PropertyHint subtype_hint;
+	String subtype_hint_string;
 
 	void _page_changed(double p_page);
 	void _length_changed(double p_page);
@@ -101,12 +104,14 @@ class EditorPropertyArray : public EditorProperty {
 	void _change_type(Object *p_button, int p_index);
 	void _change_type_menu(int p_index);
 
+	void _object_id_selected(const String &p_property, ObjectID p_id);
+
 protected:
 	static void _bind_methods();
 	void _notification(int p_what);
 
 public:
-	void setup(Variant::Type p_array_type);
+	void setup(Variant::Type p_array_type, const String &p_hint_string = "");
 	virtual void update_property();
 	EditorPropertyArray();
 };
@@ -134,6 +139,7 @@ class EditorPropertyDictionary : public EditorProperty {
 	void _change_type_menu(int p_index);
 
 	void _add_key_value();
+	void _object_id_selected(const String &p_property, ObjectID p_id);
 
 protected:
 	static void _bind_methods();

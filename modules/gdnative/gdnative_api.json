@@ -4755,7 +4755,7 @@
       },
       {
         "name": "godot_string_operator_index",
-        "return_type": "wchar_t *",
+        "return_type": "const wchar_t *",
         "arguments": [
           ["godot_string *", "p_self"],
           ["const godot_int", "p_idx"]
@@ -6371,6 +6371,42 @@
           "return_type": "godot_real",
           "arguments": [
             ["godot_int", "p_controller_id"]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "videodecoder",
+      "type": "VIDEODECODER",
+      "version": {
+        "major": 0,
+        "minor": 1
+      },
+      "next": null,
+      "api": [
+        {
+          "name": "godot_videodecoder_file_read",
+          "return_type": "godot_int",
+          "arguments": [
+            ["void *", "file_ptr"],
+            ["uint8_t *", "buf"],
+            ["int", "buf_size"]
+          ]
+        },
+        {
+          "name": "godot_videodecoder_file_seek",
+          "return_type": "int64_t",
+          "arguments": [
+            [ "void *", "file_ptr"],
+            ["int64_t", "pos"],
+            ["int", "whence"]
+          ]
+        },
+        {
+          "name": "godot_videodecoder_register_decoder",
+          "return_type": "void",
+          "arguments": [
+            ["const godot_videodecoder_interface_gdnative *", "p_interface"]
           ]
         }
       ]

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -994,10 +994,10 @@ void AtlasTexture::_bind_methods() {
 
 void AtlasTexture::draw(RID p_canvas_item, const Point2 &p_pos, const Color &p_modulate, bool p_transpose, const Ref<Texture> &p_normal_map) const {
 
-	Rect2 rc = region;
-
 	if (!atlas.is_valid())
 		return;
+
+	Rect2 rc = region;
 
 	if (rc.size.width == 0) {
 		rc.size.width = atlas->get_width();
@@ -1013,10 +1013,10 @@ void AtlasTexture::draw(RID p_canvas_item, const Point2 &p_pos, const Color &p_m
 
 void AtlasTexture::draw_rect(RID p_canvas_item, const Rect2 &p_rect, bool p_tile, const Color &p_modulate, bool p_transpose, const Ref<Texture> &p_normal_map) const {
 
-	Rect2 rc = region;
-
 	if (!atlas.is_valid())
 		return;
+
+	Rect2 rc = region;
 
 	if (rc.size.width == 0) {
 		rc.size.width = atlas->get_width();
@@ -1048,10 +1048,10 @@ void AtlasTexture::draw_rect_region(RID p_canvas_item, const Rect2 &p_rect, cons
 
 bool AtlasTexture::get_rect_region(const Rect2 &p_rect, const Rect2 &p_src_rect, Rect2 &r_rect, Rect2 &r_src_rect) const {
 
-	Rect2 rc = region;
-
 	if (!atlas.is_valid())
 		return false;
+
+	Rect2 rc = region;
 
 	Rect2 src = p_src_rect;
 	if (src.size == Size2()) {
@@ -1084,11 +1084,17 @@ bool AtlasTexture::get_rect_region(const Rect2 &p_rect, const Rect2 &p_src_rect,
 
 bool AtlasTexture::is_pixel_opaque(int p_x, int p_y) const {
 
-	if (atlas.is_valid()) {
-		return atlas->is_pixel_opaque(p_x + region.position.x + margin.position.x, p_x + region.position.y + margin.position.y);
-	}
+	if (!atlas.is_valid())
+		return true;
 
-	return true;
+	int x = p_x + region.position.x - margin.position.x;
+	int y = p_y + region.position.y - margin.position.y;
+
+	// margin edge may outside of atlas
+	if (x < 0 || x >= atlas->get_width()) return false;
+	if (y < 0 || y >= atlas->get_height()) return false;
+
+	return atlas->is_pixel_opaque(x, y);
 }
 
 AtlasTexture::AtlasTexture() {
@@ -1202,6 +1208,17 @@ Ref<Texture> LargeTexture::get_piece_texture(int p_idx) const {
 
 	ERR_FAIL_INDEX_V(p_idx, pieces.size(), Ref<Texture>());
 	return pieces[p_idx].texture;
+}
+Ref<Image> LargeTexture::to_image() const {
+
+	Ref<Image> img = memnew(Image(this->get_width(), this->get_height(), false, Image::FORMAT_RGBA8));
+	for (int i = 0; i < pieces.size(); i++) {
+
+		Ref<Image> src_img = pieces[i].texture->get_data();
+		img->blit_rect(src_img, Rect2(0, 0, src_img->get_width(), src_img->get_height()), pieces[i].offset);
+	}
+
+	return img;
 }
 
 void LargeTexture::_bind_methods() {
@@ -2065,7 +2082,7 @@ void TextureLayered::create(uint32_t p_width, uint32_t p_height, uint32_t p_dept
 	width = p_width;
 	height = p_height;
 	depth = p_depth;
-
+	format = p_format;
 	flags = p_flags;
 }
 

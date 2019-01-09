@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1419,7 +1419,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 		while (c) {
 
-			if (cache.draw_relationship_lines == 1 && (c->get_parent() != root || !hide_root)) {
+			if (cache.draw_relationship_lines > 0 && (!hide_root || c->parent != root)) {
 				int root_ofs = children_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				int parent_ofs = p_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				Point2i root_pos = Point2i(root_ofs, children_pos.y + label_h / 2) - cache.offset + p_draw_ofs;
@@ -2701,6 +2701,7 @@ bool Tree::edit_selected() {
 
 		Vector2 ofs(0, (text_editor->get_size().height - rect.size.height) / 2);
 		Point2i textedpos = get_global_position() + rect.position - ofs;
+		cache.text_editor_position = textedpos;
 		text_editor->set_position(textedpos);
 		text_editor->set_size(rect.size);
 		text_editor->clear();
@@ -2955,6 +2956,21 @@ void Tree::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_THEME_CHANGED) {
 		update_cache();
+	}
+
+	if (p_what == NOTIFICATION_RESIZED || p_what == NOTIFICATION_TRANSFORM_CHANGED) {
+
+		if (popup_edited_item != NULL) {
+			Rect2 rect = popup_edited_item->get_meta("__focus_rect");
+			Vector2 ofs(0, (text_editor->get_size().height - rect.size.height) / 2);
+			Point2i textedpos = get_global_position() + rect.position - ofs;
+
+			if (cache.text_editor_position != textedpos) {
+				cache.text_editor_position = textedpos;
+				text_editor->set_position(textedpos);
+				value_editor->set_position(textedpos + Point2i(0, text_editor->get_size().height));
+			}
+		}
 	}
 }
 
@@ -3884,6 +3900,7 @@ Tree::Tree() {
 
 	value_editor->set_as_toplevel(true);
 	text_editor->set_as_toplevel(true);
+	set_notify_transform(true);
 
 	updating_value_editor = false;
 	pressed_button = -1;

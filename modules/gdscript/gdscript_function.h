@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -225,7 +225,7 @@ private:
 	bool _static;
 	MultiplayerAPI::RPCMode rpc_mode;
 
-	Ref<GDScript> _script;
+	GDScript *_script;
 
 	StringName name;
 	Vector<Variant> constants;
@@ -297,7 +297,7 @@ public:
 	int get_default_argument_addr(int p_idx) const;
 	GDScriptDataType get_return_type() const;
 	GDScriptDataType get_argument_type(int p_idx) const;
-	GDScript *get_script() const { return const_cast<GDScript *>(_script.ptr()); }
+	GDScript *get_script() const { return _script; }
 	StringName get_source() const { return source; }
 
 	void debug_get_stack_member_state(int p_line, List<Pair<StringName, int> > *r_stackvars) const;

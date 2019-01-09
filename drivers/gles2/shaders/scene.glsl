@@ -2,6 +2,7 @@
 [vertex]
 
 #ifdef USE_GLES_OVER_GL
+#define lowp
 #define mediump
 #define highp
 #else
@@ -84,7 +85,7 @@ uniform highp mat4 world_transform;
 
 uniform highp float time;
 
-
+uniform highp vec2 viewport_size;
 
 #ifdef RENDER_DEPTH
 uniform float light_bias;
@@ -351,6 +352,10 @@ void main() {
 
 #if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
 	uv2_interp = uv2_attrib;
+#endif
+
+#ifdef OVERRIDE_POSITION
+	highp vec4 position;
 #endif
 
 #if !defined(SKIP_TRANSFORM_USED) && defined(VERTEX_WORLD_COORDS_USED)
@@ -640,7 +645,12 @@ VERTEX_SHADER_CODE
 #endif //fog
 
 #endif //use vertex lighting
+
+#ifdef OVERRIDE_POSITION
+	gl_Position = position;
+#else
 	gl_Position = projection_matrix * vec4(vertex_interp, 1.0);
+#endif
 }
 
 /* clang-format off */
@@ -653,6 +663,7 @@ VERTEX_SHADER_CODE
 #endif
 
 #ifdef USE_GLES_OVER_GL
+#define lowp
 #define mediump
 #define highp
 #else
@@ -678,6 +689,8 @@ uniform highp mat4 projection_inverse_matrix;
 uniform highp mat4 world_transform;
 
 uniform highp float time;
+
+uniform highp vec2 viewport_size;
 
 #if defined(SCREEN_UV_USED)
 uniform vec2 screen_pixel_size;
@@ -1121,7 +1134,7 @@ LIGHT_SHADER_CODE
 	float NdotL = dot(N, L);
 	float cNdotL = max(NdotL, 0.0); // clamped NdotL
 	float NdotV = dot(N, V);
-	float cNdotV = max(NdotV, 0.0);
+	float cNdotV = max(abs(NdotV), 1e-6);
 
 #if defined(DIFFUSE_BURLEY) || defined(SPECULAR_BLINN) || defined(SPECULAR_SCHLICK_GGX) || defined(LIGHT_USE_CLEARCOAT)
 	vec3 H = normalize(V + L);
@@ -1250,7 +1263,7 @@ LIGHT_SHADER_CODE
 		float YdotH = dot(B, H);
 		float D = D_GGX_anisotropic(cNdotH, ax, ay, XdotH, YdotH, cNdotH);
 		//float G = G_GGX_anisotropic_2cos(cNdotL, ax, ay, XdotH, YdotH) * G_GGX_anisotropic_2cos(cNdotV, ax, ay, XdotH, YdotH);
-		float G = V_GGX_anisotropic(ax, ay, dot(T, V), dot(T, L), dot(B, V), dot(B, L), cNdotV, cNdotL))
+		float G = V_GGX_anisotropic(ax, ay, dot(T, V), dot(T, L), dot(B, V), dot(B, L), cNdotV, cNdotL);
 
 #else
 		float alpha = roughness * roughness;
@@ -1382,6 +1395,7 @@ void main() {
 		discard;
 #endif
 	highp vec3 vertex = vertex_interp;
+	vec3 view = -normalize(vertex_interp);
 	vec3 albedo = vec3(1.0);
 	vec3 transmission = vec3(0.0);
 	float metallic = 0.0;
@@ -1455,7 +1469,7 @@ FRAGMENT_SHADER_CODE
 	vec3 diffuse_light = vec3(0.0, 0.0, 0.0);
 	vec3 ambient_light = vec3(0.0, 0.0, 0.0);
 
-	vec3 eye_position = -normalize(vertex_interp);
+	vec3 eye_position = view;
 
 #if defined(ALPHA_SCISSOR_USED)
 	if (alpha < alpha_scissor) {
@@ -1910,7 +1924,6 @@ FRAGMENT_SHADER_CODE
 #ifdef USE_SHADOW
 	{
 		highp vec4 splane = shadow_coord;
-		splane.xyz /= splane.w;
 
 		float shadow = sample_shadow(light_shadow_atlas, splane);
 		light_att *= shadow;

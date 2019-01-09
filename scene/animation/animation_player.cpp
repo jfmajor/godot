@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1120,6 +1120,15 @@ void AnimationPlayer::queue(const StringName &p_name) {
 		queued.push_back(p_name);
 }
 
+PoolVector<String> AnimationPlayer::get_queue() {
+	PoolVector<String> ret;
+	for (List<StringName>::Element *E = queued.front(); E; E = E->next()) {
+		ret.push_back(E->get());
+	}
+
+	return ret;
+}
+
 void AnimationPlayer::clear_queue() {
 	queued.clear();
 }
@@ -1418,6 +1427,8 @@ StringName AnimationPlayer::find_animation(const Ref<Animation> &p_animation) co
 }
 
 void AnimationPlayer::set_autoplay(const String &p_name) {
+	if (is_inside_tree() && !Engine::get_singleton()->is_editor_hint())
+		WARN_PRINT("Setting autoplay after the node has been added to the scene has no effect.");
 
 	autoplay = p_name;
 }
@@ -1603,6 +1614,7 @@ void AnimationPlayer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_assigned_animation", "anim"), &AnimationPlayer::set_assigned_animation);
 	ClassDB::bind_method(D_METHOD("get_assigned_animation"), &AnimationPlayer::get_assigned_animation);
 	ClassDB::bind_method(D_METHOD("queue", "name"), &AnimationPlayer::queue);
+	ClassDB::bind_method(D_METHOD("get_queue"), &AnimationPlayer::get_queue);
 	ClassDB::bind_method(D_METHOD("clear_queue"), &AnimationPlayer::clear_queue);
 
 	ClassDB::bind_method(D_METHOD("set_active", "active"), &AnimationPlayer::set_active);

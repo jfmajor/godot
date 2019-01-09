@@ -145,6 +145,8 @@ void main() {
 
 #define extra_matrix extra_matrix_instance
 
+	//for compatibility with the fragment shader we need to use uv here
+	vec2 uv = uv_interp;
 	{
 		/* clang-format off */
 
@@ -152,6 +154,8 @@ VERTEX_SHADER_CODE
 
 		/* clang-format on */
 	}
+
+	uv_interp = uv;
 
 #ifdef USE_NINEPATCH
 
@@ -477,6 +481,7 @@ void main() {
 
 #if defined(NORMALMAP_USED)
 		vec3 normal_map = vec3(0.0, 0.0, 1.0);
+		normal_used = true;
 #endif
 
 		/* clang-format off */

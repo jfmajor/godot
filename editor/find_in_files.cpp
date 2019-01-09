@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -43,8 +43,6 @@
 #include "scene/gui/line_edit.h"
 #include "scene/gui/progress_bar.h"
 #include "scene/gui/tree.h"
-
-#define ROOT_PREFIX "res://"
 
 const char *FindInFiles::SIGNAL_RESULT_FOUND = "result_found";
 const char *FindInFiles::SIGNAL_FINISHED = "finished";
@@ -89,7 +87,6 @@ static bool find_next(const String &line, String pattern, int from, bool match_c
 
 //--------------------------------------------------------------------------------
 FindInFiles::FindInFiles() {
-	_root_prefix = ROOT_PREFIX;
 	_searching = false;
 	_whole_words = true;
 	_match_case = true;
@@ -182,7 +179,7 @@ void FindInFiles::_iterate() {
 			_current_dir = _current_dir.plus_file(folder_name);
 
 			PoolStringArray sub_dirs;
-			_scan_dir(_root_prefix + _current_dir, sub_dirs);
+			_scan_dir("res://" + _current_dir, sub_dirs);
 
 			_folders_stack.push_back(sub_dirs);
 
@@ -348,7 +345,7 @@ FindInFilesDialog::FindInFilesDialog() {
 		HBoxContainer *hbc = memnew(HBoxContainer);
 
 		Label *prefix_label = memnew(Label);
-		prefix_label->set_text(ROOT_PREFIX);
+		prefix_label->set_text("res://");
 		hbc->add_child(prefix_label);
 
 		_folder_line_edit = memnew(LineEdit);
@@ -375,10 +372,12 @@ FindInFilesDialog::FindInFilesDialog() {
 	{
 		HBoxContainer *hbc = memnew(HBoxContainer);
 
+		// TODO: Unhardcode this.
 		Vector<String> exts;
 		exts.push_back("gd");
 		if (Engine::get_singleton()->has_singleton("GodotSharp"))
 			exts.push_back("cs");
+		exts.push_back("shader");
 
 		for (int i = 0; i < exts.size(); ++i) {
 			CheckBox *cb = memnew(CheckBox);

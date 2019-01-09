@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -129,6 +129,22 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 				}
 				p.pop_front();
 			}
+		} else if (what == "z_index_map") {
+			tile_map[id].autotile_data.z_index_map.clear();
+			Array p = p_value;
+			Vector3 val;
+			Vector2 v;
+			int z_index;
+			while (p.size() > 0) {
+				val = p[0];
+				if (val.z != 0) {
+					v.x = val.x;
+					v.y = val.y;
+					z_index = (int)val.z;
+					tile_map[id].autotile_data.z_index_map[v] = z_index;
+				}
+				p.pop_front();
+			}
 		}
 	} else if (what == "shape")
 		tile_set_shape(id, 0, p_value);
@@ -228,6 +244,19 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 				}
 			}
 			r_ret = p;
+		} else if (what == "z_index_map") {
+			Array p;
+			Vector3 v;
+			for (Map<Vector2, int>::Element *E = tile_map[id].autotile_data.z_index_map.front(); E; E = E->next()) {
+				if (E->value() != 0) {
+					//Don't save default value
+					v.x = E->key().x;
+					v.y = E->key().y;
+					v.z = E->value();
+					p.push_back(v);
+				}
+			}
+			r_ret = p;
 		}
 	} else if (what == "shape")
 		r_ret = tile_get_shape(id, 0);
@@ -278,12 +307,14 @@ void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 			p_list->push_back(PropertyInfo(Variant::ARRAY, pre + "autotile/occluder_map", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 			p_list->push_back(PropertyInfo(Variant::ARRAY, pre + "autotile/navpoly_map", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 			p_list->push_back(PropertyInfo(Variant::ARRAY, pre + "autotile/priority_map", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
+			p_list->push_back(PropertyInfo(Variant::ARRAY, pre + "autotile/z_index_map", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 		} else if (tile_get_tile_mode(id) == ATLAS_TILE) {
 			p_list->push_back(PropertyInfo(Variant::VECTOR2, pre + "autotile/icon_coordinate", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 			p_list->push_back(PropertyInfo(Variant::VECTOR2, pre + "autotile/tile_size", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 			p_list->push_back(PropertyInfo(Variant::INT, pre + "autotile/spacing", PROPERTY_HINT_RANGE, "0,256,1", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 			p_list->push_back(PropertyInfo(Variant::ARRAY, pre + "autotile/occluder_map", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 			p_list->push_back(PropertyInfo(Variant::ARRAY, pre + "autotile/navpoly_map", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
+			p_list->push_back(PropertyInfo(Variant::ARRAY, pre + "autotile/z_index_map", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 		}
 		p_list->push_back(PropertyInfo(Variant::VECTOR2, pre + "occluder_offset"));
 		p_list->push_back(PropertyInfo(Variant::OBJECT, pre + "occluder", PROPERTY_HINT_RESOURCE_TYPE, "OccluderPolygon2D"));
@@ -481,6 +512,30 @@ const Map<Vector2, int> &TileSet::autotile_get_priority_map(int p_id) const {
 	static Map<Vector2, int> dummy;
 	ERR_FAIL_COND_V(!tile_map.has(p_id), dummy);
 	return tile_map[p_id].autotile_data.priority_map;
+}
+
+void TileSet::autotile_set_z_index(int p_id, const Vector2 &p_coord, int p_z_index) {
+
+	ERR_FAIL_COND(!tile_map.has(p_id));
+	tile_map[p_id].autotile_data.z_index_map[p_coord] = p_z_index;
+	emit_changed();
+}
+
+int TileSet::autotile_get_z_index(int p_id, const Vector2 &p_coord) {
+
+	ERR_FAIL_COND_V(!tile_map.has(p_id), 1);
+	if (tile_map[p_id].autotile_data.z_index_map.has(p_coord)) {
+		return tile_map[p_id].autotile_data.z_index_map[p_coord];
+	}
+	//When not custom z index set return the default value
+	return 0;
+}
+
+const Map<Vector2, int> &TileSet::autotile_get_z_index_map(int p_id) const {
+
+	static Map<Vector2, int> dummy;
+	ERR_FAIL_COND_V(!tile_map.has(p_id), dummy);
+	return tile_map[p_id].autotile_data.z_index_map;
 }
 
 void TileSet::autotile_set_bitmask(int p_id, Vector2 p_coord, uint16_t p_flag) {
@@ -938,8 +993,23 @@ void TileSet::clear() {
 void TileSet::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("create_tile", "id"), &TileSet::create_tile);
+	ClassDB::bind_method(D_METHOD("autotile_clear_bitmask_map", "id"), &TileSet::autotile_clear_bitmask_map);
+	ClassDB::bind_method(D_METHOD("autotile_set_icon_coordinate", "id", "coord"), &TileSet::autotile_set_icon_coordinate);
+	ClassDB::bind_method(D_METHOD("autotile_get_icon_coordinate", "id"), &TileSet::autotile_get_icon_coordinate);
+	ClassDB::bind_method(D_METHOD("autotile_set_subtile_priority", "id", "coord", "priority"), &TileSet::autotile_set_subtile_priority);
+	ClassDB::bind_method(D_METHOD("autotile_get_subtile_priority", "id", "coord"), &TileSet::autotile_get_subtile_priority);
+	ClassDB::bind_method(D_METHOD("autotile_set_z_index", "id", "coord", "z_index"), &TileSet::autotile_set_z_index);
+	ClassDB::bind_method(D_METHOD("autotile_get_z_index", "id", "coord"), &TileSet::autotile_get_z_index);
+	ClassDB::bind_method(D_METHOD("autotile_set_light_occluder", "id", "light_occluder", "coord"), &TileSet::autotile_set_light_occluder);
+	ClassDB::bind_method(D_METHOD("autotile_get_light_occluder", "id", "coord"), &TileSet::autotile_get_light_occluder);
+	ClassDB::bind_method(D_METHOD("autotile_set_navigation_polygon", "id", "navigation_polygon", "coord"), &TileSet::autotile_set_navigation_polygon);
+	ClassDB::bind_method(D_METHOD("autotile_get_navigation_polygon", "id", "coord"), &TileSet::autotile_get_navigation_polygon);
+	ClassDB::bind_method(D_METHOD("autotile_set_bitmask", "id", "bitmask", "flag"), &TileSet::autotile_set_bitmask);
+	ClassDB::bind_method(D_METHOD("autotile_get_bitmask", "id", "coord"), &TileSet::autotile_get_bitmask);
 	ClassDB::bind_method(D_METHOD("autotile_set_bitmask_mode", "id", "mode"), &TileSet::autotile_set_bitmask_mode);
 	ClassDB::bind_method(D_METHOD("autotile_get_bitmask_mode", "id"), &TileSet::autotile_get_bitmask_mode);
+	ClassDB::bind_method(D_METHOD("autotile_set_spacing", "id", "spacing"), &TileSet::autotile_set_spacing);
+	ClassDB::bind_method(D_METHOD("autotile_get_spacing", "id"), &TileSet::autotile_get_spacing);
 	ClassDB::bind_method(D_METHOD("autotile_set_size", "id", "size"), &TileSet::autotile_set_size);
 	ClassDB::bind_method(D_METHOD("autotile_get_size", "id"), &TileSet::autotile_get_size);
 	ClassDB::bind_method(D_METHOD("tile_set_name", "id", "name"), &TileSet::tile_set_name);

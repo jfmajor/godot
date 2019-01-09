@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -353,7 +353,8 @@ Vector<String> FileAccess::get_csv_line(const String &p_delim) const {
 	String l;
 	int qc = 0;
 	do {
-		ERR_FAIL_COND_V(eof_reached(), Vector<String>());
+		if (eof_reached())
+			break;
 
 		l += get_line() + "\n";
 		qc = 0;
@@ -534,7 +535,7 @@ void FileAccess::store_csv_line(const Vector<String> &p_values, const String &p_
 	for (int i = 0; i < size; ++i) {
 		String value = p_values[i];
 
-		if (value.find("\"") != -1 || value.find(p_delim) != -1 || value.find("\n")) {
+		if (value.find("\"") != -1 || value.find(p_delim) != -1 || value.find("\n") != -1) {
 			value = "\"" + value.replace("\"", "\"\"") + "\"";
 		}
 		if (i < size - 1) {
