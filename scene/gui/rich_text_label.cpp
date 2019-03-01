@@ -175,11 +175,13 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 		l.char_count = 0;
 		l.minimum_width = 0;
 		l.maximum_width = 0;
+		l.visible_width = 0;
 	}
 
 	int wofs = margin;
 	int spaces_size = 0;
 	int align_ofs = 0;
+	int line_char_count = 0;
 
 	if (p_mode != PROCESS_CACHE && align != ALIGN_FILL)
 		wofs += line_ofs;
@@ -346,7 +348,8 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 					int end = 0;
 					int w = 0;
-					int fw = 0;
+					int vw = 0;
+					int fw = 0;					
 
 					lh = 0;
 					if (p_mode != PROCESS_CACHE) {
@@ -354,20 +357,26 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 						line_ascent = line < l.ascent_caches.size() ? l.ascent_caches[line] : 1;
 						line_descent = line < l.descent_caches.size() ? l.descent_caches[line] : 1;
 					}
-					while (c[end] != 0 && !(end && c[end - 1] == ' ' && c[end] != ' ')) {
 
+					while (c[end] != 0 && !(end && c[end - 1] == ' ' && c[end] != ' ')) {
 						int cw = font->get_char_size(c[end], c[end + 1]).width;
 						if (c[end] == '\t') {
 							cw = tab_size * font->get_char_size(' ').width;
 						}
 
-						if (end > 0 && w + cw + begin > p_width) {
-							break; //don't allow lines longer than assigned width
+						// don't allow lines longer than assigned width
+						if ((end > 0 && w + cw + begin > p_width)) {
+							break;
+						}
+
+						if (visible_characters < 0 || line_char_count < visible_characters) {
+							vw += cw;
 						}
 
 						w += cw;
 						fw += cw;
 
+						line_char_count++;
 						end++;
 					}
 					CHECK_HEIGHT(fh);
@@ -487,6 +496,9 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 						}
 					}
 
+					if (p_mode == PROCESS_CACHE && vw > 0) {
+						l.visible_width += vw;
+					}
 					ADVANCE(fw);
 					CHECK_HEIGHT(fh); //must be done somewhere
 					c = &c[end];
@@ -520,7 +532,10 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					img->image->draw(ci, p_ofs + Point2(align_ofs + wofs, y + lh - font->get_descent() - img->image->get_height()));
 				}
 				p_char_count++;
-
+				if (p_mode == PROCESS_CACHE && (visible_characters < 0 || line_char_count < visible_characters)) {
+					l.visible_width += img->image->get_width();
+				}
+				line_char_count++;
 				ADVANCE(img->image->get_width());
 				CHECK_HEIGHT((img->image->get_height() + font->get_descent()));
 
@@ -706,6 +721,9 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					total_height = row_height + vseparation;
 				}
 
+				if (p_mode == PROCESS_CACHE) {
+					l.visible_width = MAX(l.visible_width, wofs + table->total_width);
+				}
 				ADVANCE(table->total_width);
 				CHECK_HEIGHT(total_height);
 
@@ -775,6 +793,7 @@ void RichTextLabel::_update_scroll() {
 		}
 
 		main->first_invalid_line = 0; //invalidate ALL
+		content_width_valid = false;
 		_validate_line_caches(main);
 	}
 	scroll_updated = true;
@@ -787,6 +806,7 @@ void RichTextLabel::_notification(int p_what) {
 		case NOTIFICATION_RESIZED: {
 
 			main->first_invalid_line = 0; //invalidate ALL
+			content_width_valid = false;
 			update();
 
 		} break;
@@ -796,6 +816,7 @@ void RichTextLabel::_notification(int p_what) {
 				set_bbcode(bbcode);
 
 			main->first_invalid_line = 0; //invalidate ALL
+			content_width_valid = false;
 			update();
 
 		} break;
@@ -1330,13 +1351,18 @@ void RichTextLabel::_validate_line_caches(ItemFrame *p_frame) {
 		vscroll->set_value(total_height - size.height);
 
 	updating_scroll = false;
+
+	if (auto_resize_to_text) {
+		minimum_size_changed();
+		set_size(Size2(get_size().x, get_content_height()));
+	}
 }
 
 void RichTextLabel::_invalidate_current_line(ItemFrame *p_frame) {
+	content_width_valid = false;
 
 	if (p_frame->lines.size() - 1 <= p_frame->first_invalid_line) {
-
-		p_frame->first_invalid_line = p_frame->lines.size() - 1;
+		p_frame->first_invalid_line = p_frame->lines.size() - 1;		
 		update();
 	}
 }
@@ -1487,6 +1513,7 @@ bool RichTextLabel::remove_line(const int p_line) {
 		main->lines.write[0].from = main;
 
 	main->first_invalid_line = 0;
+	content_width_valid = false;
 
 	return true;
 }
@@ -1601,6 +1628,7 @@ void RichTextLabel::push_cell() {
 	item->lines.resize(1);
 	item->lines.write[0].from = NULL;
 	item->first_invalid_line = 0;
+	content_width_valid = false;
 }
 
 int RichTextLabel::get_current_table_column() const {
@@ -1629,6 +1657,7 @@ void RichTextLabel::clear() {
 	main->lines.clear();
 	main->lines.resize(1);
 	main->first_invalid_line = 0;
+	content_width_valid = false;
 	update();
 	selection.click = NULL;
 	selection.active = false;
@@ -1639,7 +1668,9 @@ void RichTextLabel::set_tab_size(int p_spaces) {
 
 	tab_size = p_spaces;
 	main->first_invalid_line = 0;
+	content_width_valid = false;
 	update();
+
 }
 
 int RichTextLabel::get_tab_size() const {
@@ -2147,14 +2178,13 @@ void RichTextLabel::set_text(const String &p_string) {
 }
 
 void RichTextLabel::set_percent_visible(float p_percent) {
+	content_width_valid = false;
+	current_frame->first_invalid_line = 0;
 
 	if (p_percent < 0 || p_percent >= 1) {
-
 		visible_characters = -1;
 		percent_visible = 1;
-
-	} else {
-
+	} else {		
 		visible_characters = get_total_character_count() * p_percent;
 		percent_visible = p_percent;
 	}
@@ -2165,11 +2195,46 @@ float RichTextLabel::get_percent_visible() const {
 	return percent_visible;
 }
 
-int RichTextLabel::get_content_height() {
-	int total_height = 0;
-	if (main->lines.size())
-		total_height = main->lines[main->lines.size() - 1].height_accum_cache + get_stylebox("normal")->get_minimum_size().height;
-	return total_height;
+int RichTextLabel::get_content_width() const {
+	if (!content_width_valid) {		
+		const_cast<RichTextLabel *>(this)->_update_content_width_cache();
+	}
+
+	return content_width_cache;
+}
+
+void RichTextLabel::_update_content_width_cache() {
+	_validate_line_caches(main);
+
+	content_width_cache = 0;
+	visible_content_width_cache = 0;
+	int charCount = 0;
+	for (int i = 0; i < main->lines.size(); i++) {
+		content_width_cache = MAX(content_width_cache, main->lines[i].maximum_width);
+		if(visible_characters < 0 || visible_characters >= charCount)
+			visible_content_width_cache = MAX(visible_content_width_cache, main->lines[i].visible_width);
+		charCount += main->lines[i].char_count;
+	}
+
+	content_width_valid = true;
+}
+
+int RichTextLabel::get_visible_content_width() const {
+	if (!content_width_valid) {
+		const_cast<RichTextLabel *>(this)->_update_content_width_cache();
+	}
+
+	return visible_content_width_cache;
+}
+
+int RichTextLabel::get_content_height() const {
+	const_cast<RichTextLabel *>(this)->_validate_line_caches(main);
+
+	if (main->lines.size()) {
+		return main->lines[main->lines.size() - 1].height_accum_cache + get_stylebox("normal")->get_minimum_size().height;
+	}
+
+	return 0;
 }
 
 void RichTextLabel::_bind_methods() {
@@ -2239,10 +2304,12 @@ void RichTextLabel::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_line_count"), &RichTextLabel::get_line_count);
 	ClassDB::bind_method(D_METHOD("get_visible_line_count"), &RichTextLabel::get_visible_line_count);
 
+	ClassDB::bind_method(D_METHOD("get_content_width"), &RichTextLabel::get_content_width);
+	ClassDB::bind_method(D_METHOD("get_visible_content_width"), &RichTextLabel::get_visible_content_width);
 	ClassDB::bind_method(D_METHOD("get_content_height"), &RichTextLabel::get_content_height);
 
-    ClassDB::bind_method(D_METHOD("set_auto_resize_to_text", "width"), &RichTextLabel::set_auto_resize_to_text);
-    ClassDB::bind_method(D_METHOD("is_auto_resize_to_text"), &RichTextLabel::is_auto_resize_to_text);
+	ClassDB::bind_method(D_METHOD("set_auto_resize_to_text", "enable"), &RichTextLabel::set_auto_resize_to_text);
+	ClassDB::bind_method(D_METHOD("is_auto_resize_to_text"), &RichTextLabel::is_auto_resize_to_text);
 
 	ADD_GROUP("BBCode", "bbcode_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bbcode_enabled"), "set_use_bbcode", "is_using_bbcode");
@@ -2261,7 +2328,7 @@ void RichTextLabel::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "selection_enabled"), "set_selection_enabled", "is_selection_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "override_selected_font_color"), "set_override_selected_font_color", "is_overriding_selected_font_color");
 
-    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_resize_to_text"), "set_auto_resize_to_text", "is_auto_resize_to_text");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_resize_to_text"), "set_auto_resize_to_text", "is_auto_resize_to_text");
 
 	ADD_SIGNAL(MethodInfo("meta_clicked", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
 	ADD_SIGNAL(MethodInfo("meta_hover_started", PropertyInfo(Variant::NIL, "meta", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT)));
@@ -2292,7 +2359,8 @@ void RichTextLabel::_bind_methods() {
 }
 
 void RichTextLabel::set_visible_characters(int p_visible) {
-
+	current_frame->first_invalid_line = 0;
+	content_width_valid = false;
 	visible_characters = p_visible;
 	update();
 }
@@ -2310,31 +2378,31 @@ int RichTextLabel::get_total_character_count() const {
 }
 
 void RichTextLabel::set_fixed_size_to_width(int p_width) {
+	content_width_valid = false;
 	fixed_width = p_width;
 	minimum_size_changed();
 }
 
 Size2 RichTextLabel::get_minimum_size() const {
-
 	if (fixed_width != -1) {
-		const_cast<RichTextLabel *>(this)->_validate_line_caches(main);
-		return Size2(fixed_width, const_cast<RichTextLabel *>(this)->get_content_height());
+		return Size2(fixed_width, get_content_height());
+	} else if (auto_resize_to_text) {
+		return Size2(get_custom_minimum_size().x, get_content_height());
 	}
-    else if (auto_resize_to_text) {
-        const_cast<RichTextLabel *>(this)->_validate_line_caches(main);
-        return Size2(const_cast<RichTextLabel *>(this)->get_custom_minimum_size().x, const_cast<RichTextLabel *>(this)->get_content_height());
-    }
 
 	return Size2();
 }
 
 void RichTextLabel::set_auto_resize_to_text(bool p_autoresize) {
-    auto_resize_to_text = p_autoresize;
-    minimum_size_changed();
+	auto_resize_to_text = p_autoresize;		
+	if (auto_resize_to_text) {
+		minimum_size_changed();
+		set_size(Size2(get_size().x, get_content_height()));
+	}
 }
 
 bool RichTextLabel::is_auto_resize_to_text() const {
-    return auto_resize_to_text;
+	return auto_resize_to_text;
 }
 
 RichTextLabel::RichTextLabel() {
@@ -2379,6 +2447,10 @@ RichTextLabel::RichTextLabel() {
 	visible_characters = -1;
 	percent_visible = 1;
 	visible_line_count = 0;
+
+	content_width_valid = false;
+	content_width_cache = 0;
+	visible_content_width_cache = 0;
 
 	auto_resize_to_text = false;
 

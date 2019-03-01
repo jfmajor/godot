@@ -89,10 +89,16 @@ private:
 		int char_count;
 		int minimum_width;
 		int maximum_width;
+		int visible_width;
 
 		Line() {
 			from = NULL;
+			height_cache = 0;
+			height_accum_cache = 0;
 			char_count = 0;
+			minimum_width = 0;
+			maximum_width = 0;
+			visible_width = 0;
 		}
 	};
 
@@ -112,12 +118,15 @@ private:
 			}
 		}
 
-		Item() {
-			parent = NULL;
-			E = NULL;
-			line = 0;
-		}
-		virtual ~Item() { _clear_children(); }
+		protected:
+			Item() {
+				parent = NULL;
+				E = NULL;
+				line = 0;
+			}
+
+		public:
+			virtual ~Item() { _clear_children(); }
 	};
 
 	struct ItemFrame : public Item {
@@ -130,9 +139,10 @@ private:
 
 		ItemFrame() {
 			type = ITEM_FRAME;
-			parent_frame = NULL;
-			cell = false;
 			parent_line = 0;
+			cell = false;
+			first_invalid_line = 0;
+			parent_frame = NULL;
 		}
 	};
 
@@ -211,7 +221,10 @@ private:
 
 		Vector<Column> columns;
 		int total_width;
-		ItemTable() { type = ITEM_TABLE; }
+		ItemTable() {
+			type = ITEM_TABLE;
+			total_width = 0;
+		}
 	};
 
 	ItemFrame *main;
@@ -229,6 +242,9 @@ private:
 	bool updating_scroll;
 	int current_idx;
 	int visible_line_count;
+	bool content_width_valid;
+	int content_width_cache;
+	int visible_content_width_cache;	
 
 	int tab_size;
 	bool underline_meta;
@@ -303,6 +319,7 @@ private:
 
 	int fixed_width;
 	bool auto_resize_to_text;
+
 protected:
 	void _notification(int p_what);
 
@@ -351,7 +368,10 @@ public:
 	int get_line_count() const;
 	int get_visible_line_count() const;
 
-	int get_content_height();
+	int get_content_width() const;
+	void _update_content_width_cache();
+	int get_visible_content_width() const;
+	int get_content_height() const;	
 
 	VScrollBar *get_v_scroll() { return vscroll; }
 
