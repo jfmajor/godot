@@ -167,7 +167,7 @@ static String _opstr(SL::Operator p_op) {
 static String _mkid(const String &p_id) {
 
 	String id = "m_" + p_id;
-	return id.replace("__", "_dus_"); //doubleunderscore is reserverd in glsl
+	return id.replace("__", "_dus_"); //doubleunderscore is reserved in glsl
 }
 
 static String f2sp0(float p_float) {
@@ -373,7 +373,7 @@ String ShaderCompilerGLES3::_dump_node_code(SL::Node *p_node, int p_level, Gener
 					ucode = "uniform ";
 				}
 
-				ucode += _prestr(E->get().precission);
+				ucode += _prestr(E->get().precision);
 				ucode += _typestr(E->get().type);
 				ucode += " " + _mkid(E->key());
 				ucode += ";\n";
@@ -464,7 +464,7 @@ String ShaderCompilerGLES3::_dump_node_code(SL::Node *p_node, int p_level, Gener
 
 				String vcode;
 				String interp_mode = _interpstr(E->get().interpolation);
-				vcode += _prestr(E->get().precission);
+				vcode += _prestr(E->get().precision);
 				vcode += _typestr(E->get().type);
 				vcode += " " + _mkid(E->key());
 				vcode += ";\n";
@@ -748,7 +748,7 @@ Error ShaderCompilerGLES3::compile(VS::ShaderMode p_mode, const String &p_code, 
 
 		Vector<String> shader = p_code.split("\n");
 		for (int i = 0; i < shader.size(); i++) {
-			print_line(itos(i) + " " + shader[i]);
+			print_line(itos(i + 1) + " " + shader[i]);
 		}
 
 		_err_print_error(NULL, p_path.utf8().get_data(), parser.get_error_line(), parser.get_error_text().utf8().get_data(), ERR_HANDLER_SHADER);
@@ -963,9 +963,9 @@ ShaderCompilerGLES3::ShaderCompilerGLES3() {
 	actions[VS::SHADER_PARTICLES].renames["EMISSION_TRANSFORM"] = "emission_transform";
 	actions[VS::SHADER_PARTICLES].renames["RANDOM_SEED"] = "random_seed";
 
-	actions[VS::SHADER_SPATIAL].render_mode_defines["disable_force"] = "#define DISABLE_FORCE\n";
-	actions[VS::SHADER_SPATIAL].render_mode_defines["disable_velocity"] = "#define DISABLE_VELOCITY\n";
-	actions[VS::SHADER_SPATIAL].render_mode_defines["keep_data"] = "#define ENABLE_KEEP_DATA\n";
+	actions[VS::SHADER_PARTICLES].render_mode_defines["disable_force"] = "#define DISABLE_FORCE\n";
+	actions[VS::SHADER_PARTICLES].render_mode_defines["disable_velocity"] = "#define DISABLE_VELOCITY\n";
+	actions[VS::SHADER_PARTICLES].render_mode_defines["keep_data"] = "#define ENABLE_KEEP_DATA\n";
 
 	vertex_name = "vertex";
 	fragment_name = "fragment";

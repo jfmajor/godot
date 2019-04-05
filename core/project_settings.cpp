@@ -501,7 +501,7 @@ Error ProjectSettings::_load_settings_binary(const String p_path) {
 		d.resize(vlen);
 		f->get_buffer(d.ptrw(), vlen);
 		Variant value;
-		Error err = decode_variant(value, d.ptr(), d.size());
+		err = decode_variant(value, d.ptr(), d.size());
 		ERR_EXPLAIN("Error decoding property: " + key);
 		ERR_CONTINUE(err != OK);
 		set(key, value);
@@ -656,7 +656,7 @@ Error ProjectSettings::_save_settings_binary(const String &p_file, const Map<Str
 		file->store_string(key);
 
 		int len;
-		Error err = encode_variant(p_custom_features, NULL, len);
+		err = encode_variant(p_custom_features, NULL, len);
 		if (err != OK) {
 			memdelete(file);
 			ERR_FAIL_V(err);
@@ -694,7 +694,7 @@ Error ProjectSettings::_save_settings_binary(const String &p_file, const Map<Str
 			file->store_string(key);
 
 			int len;
-			Error err = encode_variant(value, NULL, len);
+			err = encode_variant(value, NULL, len);
 			if (err != OK)
 				memdelete(file);
 			ERR_FAIL_COND_V(err != OK, ERR_INVALID_DATA);
@@ -1163,8 +1163,6 @@ ProjectSettings::ProjectSettings() {
 	GLOBAL_DEF("input/ui_end", action);
 	input_presets.push_back("input/ui_end");
 
-	//GLOBAL_DEF("display/window/handheld/orientation", "landscape");
-
 	custom_prop_info["display/window/handheld/orientation"] = PropertyInfo(Variant::STRING, "display/window/handheld/orientation", PROPERTY_HINT_ENUM, "landscape,portrait,reverse_landscape,reverse_portrait,sensor_landscape,sensor_portrait,sensor");
 	custom_prop_info["rendering/threads/thread_model"] = PropertyInfo(Variant::INT, "rendering/threads/thread_model", PROPERTY_HINT_ENUM, "Single-Unsafe,Single-Safe,Multi-Threaded");
 	custom_prop_info["physics/2d/thread_model"] = PropertyInfo(Variant::INT, "physics/2d/thread_model", PROPERTY_HINT_ENUM, "Single-Unsafe,Single-Safe,Multi-Threaded");
@@ -1186,6 +1184,9 @@ ProjectSettings::ProjectSettings() {
 
 	Compression::gzip_level = GLOBAL_DEF("compression/formats/gzip/compression_level", Z_DEFAULT_COMPRESSION);
 	custom_prop_info["compression/formats/gzip/compression_level"] = PropertyInfo(Variant::INT, "compression/formats/gzip/compression_level", PROPERTY_HINT_RANGE, "-1,9,1");
+
+	// Would ideally be defined in an Android-specific file, but then it doesn't appear in the docs
+	GLOBAL_DEF("android/modules", "");
 
 	using_datapack = false;
 }

@@ -105,7 +105,7 @@ class EditorExportPlatformIOS : public EditorExportPlatform {
 
 		if (pname.length() == 0) {
 			if (r_error) {
-				*r_error = "Identifier is missing.";
+				*r_error = TTR("Identifier is missing.");
 			}
 			return false;
 		}
@@ -116,7 +116,7 @@ class EditorExportPlatformIOS : public EditorExportPlatform {
 			CharType c = pname[i];
 			if (first && c == '.') {
 				if (r_error) {
-					*r_error = "Identifier segments must be of non-zero length.";
+					*r_error = TTR("Identifier segments must be of non-zero length.");
 				}
 				return false;
 			}
@@ -127,19 +127,19 @@ class EditorExportPlatformIOS : public EditorExportPlatform {
 			}
 			if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
 				if (r_error) {
-					*r_error = "The character '" + String::chr(c) + "' is not allowed in Identifier.";
+					*r_error = vformat(TTR("The character '%s' is not allowed in Identifier."), String::chr(c));
 				}
 				return false;
 			}
 			if (first && (c >= '0' && c <= '9')) {
 				if (r_error) {
-					*r_error = "A digit cannot be the first character in a Identifier segment.";
+					*r_error = TTR("A digit cannot be the first character in a Identifier segment.");
 				}
 				return false;
 			}
 			if (first && c == '_') {
 				if (r_error) {
-					*r_error = "The character '" + String::chr(c) + "' cannot be the first character in a Identifier segment.";
+					*r_error = vformat(TTR("The character '%s' cannot be the first character in a Identifier segment."), String::chr(c));
 				}
 				return false;
 			}
@@ -148,14 +148,14 @@ class EditorExportPlatformIOS : public EditorExportPlatform {
 
 		if (segments == 0) {
 			if (r_error) {
-				*r_error = "The Identifier must have at least one '.' separator.";
+				*r_error = TTR("The Identifier must have at least one '.' separator.");
 			}
 			return false;
 		}
 
 		if (first) {
 			if (r_error) {
-				*r_error = "Identifier segments must be of non-zero length.";
+				*r_error = TTR("Identifier segments must be of non-zero length.");
 			}
 			return false;
 		}
@@ -196,15 +196,16 @@ public:
 
 void EditorExportPlatformIOS::get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {
 
-	if (p_preset->get("texture_format/s3tc")) {
-		r_features->push_back("s3tc");
-	}
-	if (p_preset->get("texture_format/etc")) {
+	String driver = ProjectSettings::get_singleton()->get("rendering/quality/driver/driver_name");
+	if (driver == "GLES2") {
 		r_features->push_back("etc");
-	}
-	if (p_preset->get("texture_format/etc2")) {
+	} else if (driver == "GLES3") {
 		r_features->push_back("etc2");
+		if (ProjectSettings::get_singleton()->get("rendering/quality/driver/fallback_to_gles2")) {
+			r_features->push_back("etc");
+		}
 	}
+
 	Vector<String> architectures = _get_preset_architectures(p_preset);
 	for (int i = 0; i < architectures.size(); ++i) {
 		r_features->push_back(architectures[i]);
@@ -246,7 +247,7 @@ void EditorExportPlatformIOS::get_export_options(List<ExportOption> *r_options) 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/app_store_team_id"), ""));
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/provisioning_profile_uuid_debug"), ""));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/code_sign_identity_debug", PROPERTY_HINT_PLACEHOLDER_TEXT, "iPhone Developer"), ""));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/code_sign_identity_debug", PROPERTY_HINT_PLACEHOLDER_TEXT, "iPhone Developer"), "iPhone Developer"));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "application/export_method_debug", PROPERTY_HINT_ENUM, "App Store,Development,Ad-Hoc,Enterprise"), 1));
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/provisioning_profile_uuid_release"), ""));
@@ -255,11 +256,25 @@ void EditorExportPlatformIOS::get_export_options(List<ExportOption> *r_options) 
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/name", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Name"), ""));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/info"), "Made with Godot Engine"));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/identifier", PROPERTY_HINT_PLACEHOLDER_TEXT, "come.example.game"), ""));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/identifier", PROPERTY_HINT_PLACEHOLDER_TEXT, "com.example.game"), ""));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/signature"), ""));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/short_version"), "1.0"));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version"), "1.0"));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/copyright"), ""));
+
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "capabilities/arkit"), false));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "capabilities/access_wifi"), false));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "capabilities/game_center"), true));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "capabilities/in_app_purchases"), false));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "capabilities/push_notifications"), false));
+
+	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "privacy/camera_usage_description"), "Godot would like to use your camera"));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "privacy/photolibrary_usage_description"), "Godot would like to use your photos"));
+
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "orientation/portrait"), true));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "orientation/landscape_left"), true));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "orientation/landscape_right"), true));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "orientation/portrait_upside_down"), true));
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "required_icons/iphone_120x120", PROPERTY_HINT_FILE, "*.png"), "")); // Home screen on iPhone/iPod Touch with retina display
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "required_icons/ipad_76x76", PROPERTY_HINT_FILE, "*.png"), "")); // Home screen on iPad
@@ -274,10 +289,6 @@ void EditorExportPlatformIOS::get_export_options(List<ExportOption> *r_options) 
 	for (unsigned int i = 0; i < sizeof(loading_screen_infos) / sizeof(loading_screen_infos[0]); ++i) {
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, loading_screen_infos[i].preset_key, PROPERTY_HINT_FILE, "*.png"), ""));
 	}
-
-	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/s3tc"), false));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc"), false));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc2"), true));
 
 	Vector<ExportArchitecture> architectures = _get_supported_architectures();
 	for (int i = 0; i < architectures.size(); ++i) {
@@ -337,6 +348,59 @@ void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_
 			strnew += lines[i].replace("$linker_flags", p_config.linker_flags) + "\n";
 		} else if (lines[i].find("$cpp_code") != -1) {
 			strnew += lines[i].replace("$cpp_code", p_config.cpp_code) + "\n";
+		} else if (lines[i].find("$access_wifi") != -1) {
+			bool is_on = p_preset->get("capabilities/access_wifi");
+			strnew += lines[i].replace("$access_wifi", is_on ? "1" : "0") + "\n";
+		} else if (lines[i].find("$game_center") != -1) {
+			bool is_on = p_preset->get("capabilities/game_center");
+			strnew += lines[i].replace("$game_center", is_on ? "1" : "0") + "\n";
+		} else if (lines[i].find("$in_app_purchases") != -1) {
+			bool is_on = p_preset->get("capabilities/in_app_purchases");
+			strnew += lines[i].replace("$in_app_purchases", is_on ? "1" : "0") + "\n";
+		} else if (lines[i].find("$push_notifications") != -1) {
+			bool is_on = p_preset->get("capabilities/push_notifications");
+			strnew += lines[i].replace("$push_notifications", is_on ? "1" : "0") + "\n";
+		} else if (lines[i].find("$required_device_capabilities") != -1) {
+			String capabilities;
+
+			// I've removed armv7 as we can run on 64bit only devices
+			// Note that capabilities listed here are requirements for the app to be installed.
+			// They don't enable anything.
+
+			if ((bool)p_preset->get("capabilities/arkit")) {
+				capabilities += "<string>arkit</string>\n";
+			}
+			if ((bool)p_preset->get("capabilities/game_center")) {
+				capabilities += "<string>gamekit</string>\n";
+			}
+			if ((bool)p_preset->get("capabilities/access_wifi")) {
+				capabilities += "<string>wifi</string>\n";
+			}
+
+			strnew += lines[i].replace("$required_device_capabilities", capabilities);
+		} else if (lines[i].find("$interface_orientations") != -1) {
+			String orientations;
+
+			if ((bool)p_preset->get("orientation/portrait")) {
+				orientations += "<string>UIInterfaceOrientationPortrait</string>\n";
+			}
+			if ((bool)p_preset->get("orientation/landscape_left")) {
+				orientations += "<string>UIInterfaceOrientationLandscapeLeft</string>\n";
+			}
+			if ((bool)p_preset->get("orientation/landscape_right")) {
+				orientations += "<string>UIInterfaceOrientationLandscapeRight</string>\n";
+			}
+			if ((bool)p_preset->get("orientation/portrait_upside_down")) {
+				orientations += "<string>UIInterfaceOrientationPortraitUpsideDown</string>\n";
+			}
+
+			strnew += lines[i].replace("$interface_orientations", orientations);
+		} else if (lines[i].find("$camera_usage_description") != -1) {
+			String description = p_preset->get("privacy/camera_usage_description");
+			strnew += lines[i].replace("$camera_usage_description", description) + "\n";
+		} else if (lines[i].find("$photolibrary_usage_description") != -1) {
+			String description = p_preset->get("privacy/photolibrary_usage_description");
+			strnew += lines[i].replace("$photolibrary_usage_description", description) + "\n";
 		} else {
 			strnew += lines[i] + "\n";
 		}
@@ -648,6 +712,10 @@ void EditorExportPlatformIOS::_add_assets_to_project(Vector<uint8_t> &p_project_
 		pbx_files += file_info_format.format(format_dict, "$_");
 	}
 
+	// Note, frameworks like gamekit are always included in our project.pbxprof file
+	// even if turned off in capabilities.
+	// Frameworks that are used by modules (like arkit) we may need to optionally add here.
+
 	String str = String::utf8((const char *)p_project_data.ptr(), p_project_data.size());
 	str = str.replace("$additional_pbx_files", pbx_files);
 	str = str.replace("$additional_pbx_frameworks_build", pbx_frameworks_build);
@@ -769,6 +837,10 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 			EditorNode::add_io_error(err);
 			return ERR_FILE_NOT_FOUND;
 		}
+	}
+
+	if (!DirAccess::exists(dest_dir)) {
+		return ERR_FILE_BAD_PATH;
 	}
 
 	DirAccess *da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
@@ -1029,32 +1101,38 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 
 bool EditorExportPlatformIOS::can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 
-	bool valid = true;
 	String err;
+	r_missing_templates = find_export_template("iphone.zip") == String();
 
-	if (!exists_export_template("iphone.zip", &err)) {
-		valid = false;
+	if (p_preset->get("custom_package/debug") != "") {
+		if (FileAccess::exists(p_preset->get("custom_package/debug"))) {
+			r_missing_templates = false;
+		} else {
+			err += TTR("Custom debug template not found.") + "\n";
+		}
 	}
 
-	if (p_preset->get("custom_package/debug") != "" && !FileAccess::exists(p_preset->get("custom_package/debug"))) {
-		valid = false;
-		err += "Custom debug package not found.\n";
+	if (p_preset->get("custom_package/release") != "") {
+		if (FileAccess::exists(p_preset->get("custom_package/release"))) {
+			r_missing_templates = false;
+		} else {
+			err += TTR("Custom release template not found.") + "\n";
+		}
 	}
 
-	if (p_preset->get("custom_package/release") != "" && !FileAccess::exists(p_preset->get("custom_package/release"))) {
-		valid = false;
-		err += "Custom release package not found.\n";
-	}
+	bool valid = !r_missing_templates;
 
 	String team_id = p_preset->get("application/app_store_team_id");
 	if (team_id.length() == 0) {
-		err += "App Store Team ID not specified - cannot configure the project.\n";
+		err += TTR("App Store Team ID not specified - cannot configure the project.") + "\n";
+		valid = false;
 	}
 
 	String identifier = p_preset->get("application/identifier");
 	String pn_err;
 	if (!is_package_name_valid(identifier, &pn_err)) {
-		err += "Invalid Identifier - " + pn_err + "\n";
+		err += TTR("Invalid Identifier:") + " " + pn_err + "\n";
+		valid = false;
 	}
 
 	for (unsigned int i = 0; i < (sizeof(icon_infos) / sizeof(icon_infos[0])); ++i) {
@@ -1062,17 +1140,23 @@ bool EditorExportPlatformIOS::can_export(const Ref<EditorExportPreset> &p_preset
 		String icon_path = p_preset->get(info.preset_key);
 		if (icon_path.length() == 0) {
 			if (info.is_required) {
-				err += "Required icon is not specified in the preset.\n";
+				err += TTR("Required icon is not specified in the preset.") + "\n";
+				valid = false;
 			}
 			break;
 		}
 	}
 
+	String etc_error = test_etc2();
+	if (etc_error != String()) {
+		valid = false;
+		err += etc_error;
+	}
+
 	if (!err.empty())
 		r_error = err;
 
-	r_missing_templates = !valid;
-	return err.empty();
+	return valid;
 }
 
 EditorExportPlatformIOS::EditorExportPlatformIOS() {

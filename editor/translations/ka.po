@@ -4,12 +4,14 @@
 # This file is distributed under the same license as the Godot source code.
 # Giorgi Beriashvili <giorgi.beriashvili@outlook.com>, 2018.
 # George Dzavashvili <dzavashviligeorge@gmail.com>, 2018.
+# დემეტრე შონია <blender.animation.maker@gmail.com>, 2019.
+# Rati Nikolaishvili <rati.nikolaishvili@gmail.com>, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-12-13 14:41+0100\n"
-"Last-Translator: George Dzavashvili <dzavashviligeorge@gmail.com>\n"
+"PO-Revision-Date: 2019-03-10 09:58+0000\n"
+"Last-Translator: Rati Nikolaishvili <rati.nikolaishvili@gmail.com>\n"
 "Language-Team: Georgian <https://hosted.weblate.org/projects/godot-engine/"
 "godot/ka/>\n"
 "Language: ka\n"
@@ -17,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Weblate 3.5.1-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -61,30 +63,38 @@ msgstr ""
 #: editor/animation_bezier_editor.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Free"
-msgstr ""
+msgstr "თავისუფალი"
 
 #: editor/animation_bezier_editor.cpp
 msgid "Balanced"
-msgstr ""
+msgstr "დაბალანსებული"
 
 #: editor/animation_bezier_editor.cpp
 msgid "Mirror"
-msgstr ""
+msgstr "სარკე"
 
 #: editor/animation_bezier_editor.cpp
 #, fuzzy
 msgid "Insert Key Here"
-msgstr "ანიმ გასაღების ჩაყენება"
+msgstr "აქ ჩასვით გასაღები"
 
 #: editor/animation_bezier_editor.cpp
 #, fuzzy
 msgid "Duplicate Selected Key(s)"
-msgstr "მონიშვნის ასლის შექმნა"
+msgstr "მონიშნული გასაღებ(ებ)ის ასლის შექმნა"
 
 #: editor/animation_bezier_editor.cpp
 #, fuzzy
 msgid "Delete Selected Key(s)"
 msgstr "წავშალოთ მონიშნული ფაილები?"
+
+#: editor/animation_bezier_editor.cpp
+msgid "Add Bezier Point"
+msgstr ""
+
+#: editor/animation_bezier_editor.cpp
+msgid "Move Bezier Points"
+msgstr ""
 
 #: editor/animation_bezier_editor.cpp editor/animation_track_editor.cpp
 msgid "Anim Duplicate Keys"
@@ -100,7 +110,7 @@ msgstr "ანიმაციის გასაღებური კადრ�
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Change Transition"
-msgstr "ანიმაციის გარდამამვლობის ცვლილება"
+msgstr "ანიმაციის გარდამამვლობის შეცვლა"
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Change Transform"
@@ -115,16 +125,29 @@ msgid "Anim Change Call"
 msgstr "ანიმაციის ძახილის ცვლილება"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Change Animation Length"
+msgstr "ანიმ სიგრძის შეცვლა"
+
+#: editor/animation_track_editor.cpp
+#: editor/plugins/sprite_frames_editor_plugin.cpp
+msgid "Change Animation Loop"
+msgstr ""
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Property Track"
-msgstr ""
+msgstr "ობიექტზე დაკვირვება"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "3D Transform Track"
-msgstr ""
+msgstr "3D გარდაქმნის დაკვირვება"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Call Method Track"
-msgstr ""
+msgstr "მეთოდის გამოძახების დაკვირვება"
 
 #: editor/animation_track_editor.cpp
 msgid "Bezier Curve Track"
@@ -139,7 +162,6 @@ msgid "Animation Playback Track"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Add Track"
 msgstr "ანიმაციის თრექის დამატება"
 
@@ -151,32 +173,40 @@ msgstr "ანიმაციის ხანგრძლივობა (წა
 #: editor/animation_track_editor.cpp
 #, fuzzy
 msgid "Animation Looping"
-msgstr "ანიმაციის ზუმი."
+msgstr "ანიმაციის ბრუნვა"
 
 #: editor/animation_track_editor.cpp
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Functions:"
-msgstr ""
+msgstr "ფუნქციები:"
 
 #: editor/animation_track_editor.cpp
 msgid "Audio Clips:"
-msgstr ""
+msgstr "ხმოვანი მონაკვეთები:"
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Clips:"
-msgstr ""
+msgstr "ანიმაციის მონაკვეთები:"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Change Track Path"
+msgstr "მასივის მნიშვნელობის ცვლილება"
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Toggle this track on/off."
-msgstr ""
+msgstr "ჩანაწერის ჩართვა / გამორთვა"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Update Mode (How this property is set)"
-msgstr ""
+msgstr "განახლების რეჟიმი (როგორაც ეს პარამეტრია დაყენებული)"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Interpolation Mode"
-msgstr ""
+msgstr "ინტერპოლაციის რეჟიმი"
 
 #: editor/animation_track_editor.cpp
 msgid "Loop Wrap Mode (Interpolate end with beginning on loop)"
@@ -185,12 +215,16 @@ msgstr ""
 #: editor/animation_track_editor.cpp
 #, fuzzy
 msgid "Remove this track."
-msgstr "მონიშნული თრექის წაშლა."
+msgstr "მონიშნული ჩანაწერის წაშლა."
 
 #: editor/animation_track_editor.cpp
 #, fuzzy
 msgid "Time (s): "
-msgstr "ნაბიჯი (წამი):"
+msgstr "დრო (წამი): "
+
+#: editor/animation_track_editor.cpp
+msgid "Toggle Track Enabled"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Continuous"
@@ -206,11 +240,11 @@ msgstr "სასხლეტი"
 
 #: editor/animation_track_editor.cpp
 msgid "Capture"
-msgstr ""
+msgstr "გადაღება"
 
 #: editor/animation_track_editor.cpp
 msgid "Nearest"
-msgstr ""
+msgstr "უახლოესი"
 
 #: editor/animation_track_editor.cpp editor/plugins/curve_editor_plugin.cpp
 #: editor/property_editor.cpp
@@ -219,7 +253,7 @@ msgstr "წრფივი"
 
 #: editor/animation_track_editor.cpp
 msgid "Cubic"
-msgstr ""
+msgstr "კუბური"
 
 #: editor/animation_track_editor.cpp
 msgid "Clamp Loop Interp"
@@ -232,7 +266,7 @@ msgstr ""
 #: editor/animation_track_editor.cpp
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key"
-msgstr ""
+msgstr "ჩასვით გასაღები"
 
 #: editor/animation_track_editor.cpp
 #, fuzzy
@@ -245,16 +279,32 @@ msgid "Delete Key(s)"
 msgstr "ანიმაციის გასაღებების წაშლა"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Change Animation Update Mode"
+msgstr "ლექსიკონის მნიშვნელობის შეცვლა"
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Change Animation Interpolation Mode"
+msgstr "ინტერპოლაციის რეჟიმი"
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Change Animation Loop Mode"
+msgstr "ანიმ ლუპის შეცვლა"
+
+#: editor/animation_track_editor.cpp
 msgid "Remove Anim Track"
 msgstr "ანიმაციის თრექის წაშლა"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Create NEW track for %s and insert key?"
-msgstr "ახალი თრექის შექმნა %s სთვის და გასაღების ჩასმა?"
+msgstr "შევქმნა ახალი მონაკვეთი %s-თვის და ჩავსვა გასაღები?"
 
 #: editor/animation_track_editor.cpp
 msgid "Create %d NEW tracks and insert keys?"
-msgstr "ახალი %d თრექების შექმნა და გასაღებების ჩასმა?"
+msgstr "ახალი %d ჩანაწერების შექმნა და გასაღებების ჩასმა?"
 
 #: editor/animation_track_editor.cpp editor/create_dialog.cpp
 #: editor/editor_audio_buses.cpp editor/editor_plugin_settings.cpp
@@ -270,8 +320,11 @@ msgid "Anim Insert"
 msgstr "ანიმ ჩაყენება"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "AnimationPlayer can't animate itself, only other players."
 msgstr ""
+"ანიმაციის გამშვები ვერ ჩაატარებს ცდებს საკუთარ თავზე, მხოლოდ სხვა "
+"მოთამაშეებზე."
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Create & Insert"
@@ -279,11 +332,20 @@ msgstr "ანიმ შექმნა & ჩაყენება"
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Insert Track & Key"
-msgstr "ანიმაციის თრექის და გასაღების ჩამატება"
+msgstr "ანიმაციის ჩანაწერის და გასაღების ჩამატება"
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Insert Key"
 msgstr "ანიმ გასაღების ჩაყენება"
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Change Animation Step"
+msgstr "ანიმ სიგრძის შეცვლა"
+
+#: editor/animation_track_editor.cpp
+msgid "Rearrange Tracks"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Transform tracks only apply to Spatial-based nodes."
@@ -307,35 +369,63 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Not possible to add a new track without a root"
-msgstr ""
+msgstr "შეუძლებელია დაამატო ახალი ჩანაწერი ფესვის გარეშე"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Add Bezier Track"
+msgstr "ანიმაციის თრექის დამატება"
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Track path is invalid, so can't add a key."
-msgstr ""
+msgstr "ჩანაწერის მისამართი არასწორია, ასე რომ შეუძლებელია გასაღების დამატება"
 
 #: editor/animation_track_editor.cpp
 msgid "Track is not of type Spatial, can't insert key"
-msgstr ""
+msgstr "ჩანაწერი არ არის სივრცის სახის, ვერ ჩასვამთ გასაღებს"
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Add Transform Track Key"
+msgstr "3D გარდაქმნის დაკვირვება"
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Add Track Key"
+msgstr "ანიმაციის თრექის დამატება"
 
 #: editor/animation_track_editor.cpp
 msgid "Track path is invalid, so can't add a method key."
 msgstr ""
+"ჩანაწერის მისამართი არასწორია, ასე რომ შეუძლებელია მეთოდური გასაღების "
+"დამატება."
+
+#: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Add Method Track Key"
+msgstr "მეთოდის გამოძახების დაკვირვება"
 
 #: editor/animation_track_editor.cpp
 msgid "Method not found in object: "
-msgstr ""
+msgstr "მეთოდი ვერ მოიძებნა ობიექტში: "
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Move Keys"
 msgstr "ანიმაციის გასაღებების გადაადგილება"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Clipboard is empty"
+msgstr "ბუფერი ცარიელია"
+
+#: editor/animation_track_editor.cpp
+msgid "Paste Tracks"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Scale Keys"
-msgstr "ანიმ გასაღებების შკალირება"
+msgstr "ანიმ გასაღებების ზომის შეცვლა"
 
 #: editor/animation_track_editor.cpp
 msgid ""
@@ -344,21 +434,19 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Only show tracks from nodes selected in tree."
-msgstr ""
+msgstr "მხოლოდ აჩვენე ჩანაწერები კვანძებიდან მონიშნული ხეში."
 
 #: editor/animation_track_editor.cpp
 msgid "Group tracks by node or display them as plain list."
-msgstr ""
+msgstr "დააჯგუფე ჩანაწერები კვანძების მიხედვით ან აჩვენე როგორც უბრალო სია."
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Snap (s): "
-msgstr "ნაბიჯი (წამი):"
+msgstr "ნაბიჯი (s): "
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Animation step value."
-msgstr "ანიმაციის ზუმი."
+msgstr "ანიმაციის ნაბიჯის ღირებულება."
 
 #: editor/animation_track_editor.cpp editor/editor_properties.cpp
 #: editor/plugins/polygon_2d_editor_plugin.cpp
@@ -367,19 +455,14 @@ msgstr "ანიმაციის ზუმი."
 #: editor/project_manager.cpp editor/project_settings_editor.cpp
 #: editor/property_editor.cpp modules/visual_script/visual_script_editor.cpp
 msgid "Edit"
-msgstr ""
+msgstr "შეცვლა"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Animation properties."
-msgstr "ანიმაციის ზუმი."
+msgstr "ანიმაციის . პარამეტრები."
 
 #: editor/animation_track_editor.cpp
 msgid "Copy Tracks"
-msgstr ""
-
-#: editor/animation_track_editor.cpp
-msgid "Paste Tracks"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
@@ -485,6 +568,19 @@ msgstr ""
 msgid "Copy"
 msgstr ""
 
+#: editor/animation_track_editor_plugins.cpp
+#, fuzzy
+msgid "Add Audio Track Clip"
+msgstr "ხმოვანი მონაკვეთები:"
+
+#: editor/animation_track_editor_plugins.cpp
+msgid "Change Audio Track Clip Start Offset"
+msgstr ""
+
+#: editor/animation_track_editor_plugins.cpp
+msgid "Change Audio Track Clip End Offset"
+msgstr ""
+
 #: editor/array_property_edit.cpp
 msgid "Resize Array"
 msgstr "მასივის ზომის ცვლილება"
@@ -549,21 +645,13 @@ msgstr "ზუმის დაპატარავება"
 msgid "Reset Zoom"
 msgstr "ზუმის საწყისზე დაყენება"
 
-#: editor/code_editor.cpp
-msgid "Warnings:"
+#: editor/code_editor.cpp modules/mono/editor/mono_bottom_panel.cpp
+msgid "Warnings"
 msgstr ""
 
 #: editor/code_editor.cpp
-msgid "Font Size:"
+msgid "Line and column numbers."
 msgstr ""
-
-#: editor/code_editor.cpp
-msgid "Line:"
-msgstr "ხაზი:"
-
-#: editor/code_editor.cpp
-msgid "Col:"
-msgstr "სვეტი:"
 
 #: editor/connections_dialog.cpp
 msgid "Method in target Node must be specified!"
@@ -869,8 +957,8 @@ msgstr "წავშალოთ მონიშნული ფაილებ�
 #: editor/dependency_editor.cpp editor/editor_audio_buses.cpp
 #: editor/editor_file_dialog.cpp editor/editor_node.cpp
 #: editor/filesystem_dock.cpp editor/plugins/item_list_editor_plugin.cpp
-#: editor/project_export.cpp editor/project_settings_editor.cpp
-#: editor/scene_tree_dock.cpp
+#: editor/plugins/sprite_frames_editor_plugin.cpp editor/project_export.cpp
+#: editor/project_settings_editor.cpp editor/scene_tree_dock.cpp
 msgid "Delete"
 msgstr "წაშლა"
 
@@ -1127,7 +1215,7 @@ msgid "Add Bus"
 msgstr ""
 
 #: editor/editor_audio_buses.cpp
-msgid "Create a new Bus Layout."
+msgid "Add a new Audio Bus to this layout."
 msgstr ""
 
 #: editor/editor_audio_buses.cpp editor/editor_properties.cpp
@@ -1154,6 +1242,10 @@ msgstr ""
 
 #: editor/editor_audio_buses.cpp
 msgid "Load the default Bus Layout."
+msgstr ""
+
+#: editor/editor_audio_buses.cpp
+msgid "Create a new Bus Layout."
 msgstr ""
 
 #: editor/editor_autoload_settings.cpp
@@ -1292,7 +1384,43 @@ msgid "Storing File:"
 msgstr ""
 
 #: editor/editor_export.cpp
+msgid "No export template found at the expected path:"
+msgstr ""
+
+#: editor/editor_export.cpp
 msgid "Packing"
+msgstr ""
+
+#: editor/editor_export.cpp
+msgid ""
+"Target platform requires 'ETC' texture compression for GLES2. Enable 'Import "
+"Etc' in Project Settings."
+msgstr ""
+
+#: editor/editor_export.cpp
+msgid ""
+"Target platform requires 'ETC2' texture compression for GLES3. Enable "
+"'Import Etc 2' in Project Settings."
+msgstr ""
+
+#: editor/editor_export.cpp
+msgid ""
+"Target platform requires 'ETC' texture compression for the driver fallback "
+"to GLES2.\n"
+"Enable 'Import Etc' in Project Settings, or disable 'Driver Fallback "
+"Enabled'."
+msgstr ""
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom debug template not found."
+msgstr ""
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom release template not found."
 msgstr ""
 
 #: editor/editor_export.cpp platform/javascript/export/export.cpp
@@ -1329,7 +1457,7 @@ msgstr ""
 msgid "New Folder..."
 msgstr ""
 
-#: editor/editor_file_dialog.cpp
+#: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Refresh"
 msgstr ""
 
@@ -1404,8 +1532,28 @@ msgstr ""
 msgid "Move Favorite Down"
 msgstr ""
 
-#: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
+#: editor/editor_file_dialog.cpp
+msgid "Previous Folder"
+msgstr ""
+
+#: editor/editor_file_dialog.cpp
+msgid "Next Folder"
+msgstr ""
+
+#: editor/editor_file_dialog.cpp
 msgid "Go to parent folder"
+msgstr ""
+
+#: editor/editor_file_dialog.cpp
+msgid "(Un)favorite current folder."
+msgstr ""
+
+#: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
+msgid "View items as a grid of thumbnails."
+msgstr ""
+
+#: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
+msgid "View items as a list."
 msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
@@ -1633,13 +1781,23 @@ msgstr ""
 msgid "Project export failed with error code %d."
 msgstr ""
 
-#: editor/editor_node.cpp editor/plugins/animation_player_editor_plugin.cpp
-msgid "Error saving resource!"
+#: editor/editor_node.cpp
+msgid "Imported resources can't be saved."
 msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
 #: scene/gui/dialogs.cpp
 msgid "OK"
+msgstr ""
+
+#: editor/editor_node.cpp editor/plugins/animation_player_editor_plugin.cpp
+msgid "Error saving resource!"
+msgstr ""
+
+#: editor/editor_node.cpp
+msgid ""
+"This resource can't be saved because it does not belong to the edited scene. "
+"Make it unique first."
 msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/animation_player_editor_plugin.cpp
@@ -1831,6 +1989,14 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save changes to '%s' before closing?"
+msgstr ""
+
+#: editor/editor_node.cpp
+msgid "Saved %s modified resource(s)."
+msgstr ""
+
+#: editor/editor_node.cpp
+msgid "A root node is required to save the scene."
 msgstr ""
 
 #: editor/editor_node.cpp
@@ -2323,7 +2489,7 @@ msgid "Save & Restart"
 msgstr ""
 
 #: editor/editor_node.cpp
-msgid "Spins when the editor window repaints!"
+msgid "Spins when the editor window redraws."
 msgstr ""
 
 #: editor/editor_node.cpp
@@ -2532,6 +2698,11 @@ msgstr ""
 #: editor/editor_properties.cpp editor/plugins/root_motion_editor_plugin.cpp
 msgid "Assign..."
 msgstr ""
+
+#: editor/editor_properties.cpp
+#, fuzzy
+msgid "Invalid RID"
+msgstr "არასწორი ფონტის ზომა."
 
 #: editor/editor_properties.cpp
 msgid ""
@@ -2869,14 +3040,6 @@ msgid "Cannot navigate to '%s' as it has not been found in the file system!"
 msgstr ""
 
 #: editor/filesystem_dock.cpp
-msgid "View items as a grid of thumbnails."
-msgstr ""
-
-#: editor/filesystem_dock.cpp
-msgid "View items as a list."
-msgstr ""
-
-#: editor/filesystem_dock.cpp
 msgid "Status: Import of file failed. Please fix file and reimport manually."
 msgstr ""
 
@@ -3014,10 +3177,6 @@ msgstr ""
 #, fuzzy
 msgid "Search files"
 msgstr "ძებნა:"
-
-#: editor/filesystem_dock.cpp
-msgid "Instance the selected scene(s) as child of the selected node."
-msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid ""
@@ -3231,6 +3390,19 @@ msgstr ""
 msgid "Reimport"
 msgstr ""
 
+#: editor/import_dock.cpp
+msgid "Save scenes, re-import and restart"
+msgstr ""
+
+#: editor/import_dock.cpp
+msgid "Changing the type of an imported file requires editor restart."
+msgstr ""
+
+#: editor/import_dock.cpp
+msgid ""
+"WARNING: Assets exist that use this resource, they may stop loading properly."
+msgstr ""
+
 #: editor/inspector_dock.cpp
 msgid "Failed to load resource."
 msgstr ""
@@ -3355,23 +3527,6 @@ msgid "Create Polygon"
 msgstr "შექმნა"
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
-#, fuzzy
-msgid "Edit Polygon"
-msgstr "შექმნა"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Insert Point"
-msgstr ""
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Edit Polygon (Remove Point)"
-msgstr ""
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Remove Polygon And Point"
-msgstr ""
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 #, fuzzy
@@ -3388,6 +3543,23 @@ msgstr ""
 #: editor/plugins/abstract_polygon_2d_editor.cpp
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 msgid "Erase points."
+msgstr ""
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+#, fuzzy
+msgid "Edit Polygon"
+msgstr "შექმნა"
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Insert Point"
+msgstr ""
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Edit Polygon (Remove Point)"
+msgstr ""
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Remove Polygon And Point"
 msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
@@ -3407,8 +3579,41 @@ msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
+msgid "Move Node Point"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_1d_editor.cpp
+msgid "Change BlendSpace1D Limits"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_1d_editor.cpp
+msgid "Change BlendSpace1D Labels"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_1d_editor.cpp
+#: editor/plugins/animation_blend_space_2d_editor.cpp
 #: editor/plugins/animation_state_machine_editor.cpp
 msgid "This type of node can't be used. Only root nodes are allowed."
+msgstr ""
+
+#: editor/plugins/animation_blend_space_1d_editor.cpp
+#: editor/plugins/animation_blend_space_2d_editor.cpp
+#, fuzzy
+msgid "Add Node Point"
+msgstr "საყვარლები:"
+
+#: editor/plugins/animation_blend_space_1d_editor.cpp
+#: editor/plugins/animation_blend_space_2d_editor.cpp
+#, fuzzy
+msgid "Add Animation Point"
+msgstr "ანიმაციის ბრუნვა"
+
+#: editor/plugins/animation_blend_space_1d_editor.cpp
+msgid "Remove BlendSpace1D Point"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_1d_editor.cpp
+msgid "Move BlendSpace1D Node Point"
 msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
@@ -3453,11 +3658,36 @@ msgid "Triangle already exists"
 msgstr ""
 
 #: editor/plugins/animation_blend_space_2d_editor.cpp
+#, fuzzy
+msgid "Add Triangle"
+msgstr "ანიმაციის თრექის დამატება"
+
+#: editor/plugins/animation_blend_space_2d_editor.cpp
+msgid "Change BlendSpace2D Limits"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_2d_editor.cpp
+msgid "Change BlendSpace2D Labels"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_2d_editor.cpp
+msgid "Remove BlendSpace2D Point"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_2d_editor.cpp
+msgid "Remove BlendSpace2D Triangle"
+msgstr ""
+
+#: editor/plugins/animation_blend_space_2d_editor.cpp
 msgid "BlendSpace2D does not belong to an AnimationTree node."
 msgstr ""
 
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 msgid "No triangles exist, so no blending can take place."
+msgstr ""
+
+#: editor/plugins/animation_blend_space_2d_editor.cpp
+msgid "Toggle Auto Triangles"
 msgstr ""
 
 #: editor/plugins/animation_blend_space_2d_editor.cpp
@@ -3478,6 +3708,10 @@ msgid "Blend:"
 msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
+msgid "Parameter Changed"
+msgstr ""
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Edit Filters"
 msgstr ""
@@ -3487,9 +3721,51 @@ msgid "Output node can't be added to the blend tree."
 msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
+msgid "Add Node to BlendTree"
+msgstr ""
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Node Moved"
+msgstr ""
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Unable to connect, port may be in use or connection may be invalid."
 msgstr ""
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#: editor/plugins/visual_shader_editor_plugin.cpp
+#, fuzzy
+msgid "Nodes Connected"
+msgstr "დაკავშირება"
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#: editor/plugins/visual_shader_editor_plugin.cpp
+#, fuzzy
+msgid "Nodes Disconnected"
+msgstr "კავშირის გაწყვეტა"
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#, fuzzy
+msgid "Set Animation"
+msgstr "ანიმაციის ოპტიმიზაცია"
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#: editor/plugins/visual_shader_editor_plugin.cpp
+#, fuzzy
+msgid "Delete Node"
+msgstr "წაშლა"
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#, fuzzy
+msgid "Toggle Filter On/Off"
+msgstr "ჩანაწერის ჩართვა / გამორთვა"
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#, fuzzy
+msgid "Change Filter"
+msgstr "ანიმ სიგრძის შეცვლა"
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 msgid "No animation player set, so unable to retrieve track names."
@@ -3504,6 +3780,11 @@ msgstr ""
 msgid ""
 "Animation player has no valid root node path, so unable to retrieve track "
 "names."
+msgstr ""
+
+#: editor/plugins/animation_blend_tree_editor_plugin.cpp
+#: editor/plugins/animation_state_machine_editor.cpp
+msgid "Node Renamed"
 msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
@@ -3734,6 +4015,20 @@ msgid "Cross-Animation Blend Times"
 msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
+msgid "Move Node"
+msgstr ""
+
+#: editor/plugins/animation_state_machine_editor.cpp
+#, fuzzy
+msgid "Add Transition"
+msgstr "გარდასვლა"
+
+#: editor/plugins/animation_state_machine_editor.cpp
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Node"
+msgstr ""
+
+#: editor/plugins/animation_state_machine_editor.cpp
 msgid "End"
 msgstr ""
 
@@ -3759,6 +4054,20 @@ msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
 msgid "No playback resource set at path: %s."
+msgstr ""
+
+#: editor/plugins/animation_state_machine_editor.cpp
+#, fuzzy
+msgid "Node Removed"
+msgstr "მოშორება"
+
+#: editor/plugins/animation_state_machine_editor.cpp
+#, fuzzy
+msgid "Transition Removed"
+msgstr "გარდასვლა"
+
+#: editor/plugins/animation_state_machine_editor.cpp
+msgid "Set Start Node (Autoplay)"
 msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
@@ -4177,6 +4486,16 @@ msgid "Move CanvasItem"
 msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+msgid "Presets for the anchors and margins values of a Control node."
+msgstr ""
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
+msgid ""
+"Children of containers have their anchors and margins values overridden by "
+"their parent."
+msgstr ""
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Anchors only"
 msgstr ""
 
@@ -4559,6 +4878,10 @@ msgstr ""
 msgid "Bake GI Probe"
 msgstr ""
 
+#: editor/plugins/gradient_editor_plugin.cpp
+msgid "Gradient Edited"
+msgstr ""
+
 #: editor/plugins/item_list_editor_plugin.cpp
 msgid "Item %d"
 msgstr ""
@@ -4815,6 +5138,10 @@ msgid "Generating Visibility Rect"
 msgstr ""
 
 #: editor/plugins/particles_2d_editor_plugin.cpp
+msgid "Generate Visibility Rect"
+msgstr ""
+
+#: editor/plugins/particles_2d_editor_plugin.cpp
 msgid "Can only set point into a ParticlesMaterial process material"
 msgstr ""
 
@@ -4824,10 +5151,6 @@ msgstr ""
 
 #: editor/plugins/particles_2d_editor_plugin.cpp
 msgid "No pixels with transparency > 128 in image..."
-msgstr ""
-
-#: editor/plugins/particles_2d_editor_plugin.cpp
-msgid "Generate Visibility Rect"
 msgstr ""
 
 #: editor/plugins/particles_2d_editor_plugin.cpp
@@ -4918,11 +5241,11 @@ msgid "Generating AABB"
 msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
-msgid "Generate AABB"
+msgid "Generate Visibility AABB"
 msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
-msgid "Generate Visibility AABB"
+msgid "Generate AABB"
 msgstr ""
 
 #: editor/plugins/path_2d_editor_plugin.cpp
@@ -5078,34 +5401,36 @@ msgid "Create UV Map"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
+msgid ""
+"Polygon 2D has internal vertices, so it can no longer be edited in the "
+"viewport."
+msgstr ""
+
+#: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Create Polygon & UV"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Split point with itself."
+msgid "Create Internal Vertex"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Split can't form an existing edge."
+msgid "Remove Internal Vertex"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Split already exists."
-msgstr ""
-
-#: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Add Split"
+msgid "Invalid Polygon (need 3 different vertices)"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 #, fuzzy
-msgid "Invalid Split: "
-msgstr "არასწორი ფონტის ზომა."
+msgid "Add Custom Polygon"
+msgstr "შექმნა"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 #, fuzzy
-msgid "Remove Split"
-msgstr "მონიშვნის მოშორება"
+msgid "Remove Custom Polygon"
+msgstr "შექმნა"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Transform UV Map"
@@ -5133,12 +5458,13 @@ msgid "UV"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Poly"
+msgid "Points"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Splits"
-msgstr ""
+#, fuzzy
+msgid "Polygons"
+msgstr "შექმნა"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Bones"
@@ -5173,11 +5499,13 @@ msgid "Scale Polygon"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Connect two points to make a split."
+msgid "Create a custom polygon. Enables custom polygon rendering."
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-msgid "Select a split to erase it."
+msgid ""
+"Remove a custom polygon. If none remain, custom polygon rendering is "
+"disabled."
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
@@ -5510,6 +5838,14 @@ msgid "Open Godot online documentation"
 msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
+msgid "Request Docs"
+msgstr ""
+
+#: editor/plugins/script_editor_plugin.cpp
+msgid "Help improve the Godot documentation by giving feedback"
+msgstr ""
+
+#: editor/plugins/script_editor_plugin.cpp
 msgid "Search the reference documentation."
 msgstr ""
 
@@ -5710,6 +6046,14 @@ msgid "This skeleton has no bones, create some children Bone2D nodes."
 msgstr ""
 
 #: editor/plugins/skeleton_2d_editor_plugin.cpp
+msgid "Create Rest Pose from Bones"
+msgstr ""
+
+#: editor/plugins/skeleton_2d_editor_plugin.cpp
+msgid "Set Rest Pose to Bones"
+msgstr ""
+
+#: editor/plugins/skeleton_2d_editor_plugin.cpp
 msgid "Skeleton2D"
 msgstr ""
 
@@ -5818,10 +6162,6 @@ msgid "Vertices"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "FPS"
-msgstr ""
-
-#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Top View."
 msgstr ""
 
@@ -5866,7 +6206,7 @@ msgid "Rear"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Align with view"
+msgid "Align with View"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp editor/scene_tree_dock.cpp
@@ -5958,11 +6298,21 @@ msgid "Freelook Speed Modifier"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
+msgid ""
+"Note: The FPS value displayed is the editor's framerate.\n"
+"It cannot be used as a reliable indication of in-game performance."
+msgstr ""
+
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "View Rotation Locked"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "XForm Dialog"
+msgstr ""
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Snap Nodes To Floor"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -6178,7 +6528,7 @@ msgid "Post"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Name-less gizmo"
+msgid "Nameless gizmo"
 msgstr ""
 
 #: editor/plugins/sprite_editor_plugin.cpp
@@ -6243,10 +6593,6 @@ msgid "Add Empty"
 msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-msgid "Change Animation Loop"
-msgstr ""
-
-#: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Change Animation FPS"
 msgstr ""
 
@@ -6255,8 +6601,14 @@ msgid "(empty)"
 msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-msgid "Animations"
-msgstr ""
+#, fuzzy
+msgid "Animations:"
+msgstr "ფუნქციები:"
+
+#: editor/plugins/sprite_frames_editor_plugin.cpp
+#, fuzzy
+msgid "New Animation"
+msgstr "ანიმაციის ოპტიმიზაცია"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Speed (FPS):"
@@ -6267,8 +6619,9 @@ msgid "Loop"
 msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-msgid "Animation Frames"
-msgstr ""
+#, fuzzy
+msgid "Animation Frames:"
+msgstr "ანიმაციის . პარამეტრები."
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Insert Empty (Before)"
@@ -6560,6 +6913,22 @@ msgid "Merge from Scene"
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
+msgid "Next Coordinate"
+msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+msgid "Select the next shape, subtile, or Tile."
+msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+msgid "Previous Coordinate"
+msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+msgid "Select the previous shape, subtile, or Tile."
+msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Copy bitmask."
 msgstr ""
 
@@ -6570,6 +6939,11 @@ msgstr ""
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Erase bitmask."
 msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Create a new rectangle."
+msgstr "ახალი %s შექმნა"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 #, fuzzy
@@ -6703,6 +7077,15 @@ msgid "Clear Tile Bitmask"
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
+msgid "Make Polygon Concave"
+msgstr ""
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
+msgid "Make Polygon Convex"
+msgstr "შექმნა"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
 #, fuzzy
 msgid "Remove Tile"
 msgstr "მოშორება"
@@ -6746,6 +7129,27 @@ msgid "TileSet"
 msgstr ""
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Set Uniform Name"
+msgstr ""
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Set Input Default Port"
+msgstr ""
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Add Node to Visual Shader"
+msgstr ""
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+#, fuzzy
+msgid "Duplicate Nodes"
+msgstr "ანიმაციის გასაღებების ასლის შექმნა"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Visual Shader Input Type Changed"
+msgstr ""
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Vertex"
 msgstr ""
 
@@ -6761,6 +7165,14 @@ msgstr ""
 msgid "VisualShader"
 msgstr ""
 
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Edit Visual Property"
+msgstr ""
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Visual Shader Mode Changed"
+msgstr ""
+
 #: editor/project_export.cpp
 msgid "Runnable"
 msgstr ""
@@ -6774,7 +7186,16 @@ msgid "Delete preset '%s'?"
 msgstr ""
 
 #: editor/project_export.cpp
-msgid "Export templates for this platform are missing/corrupted:"
+msgid ""
+"Failed to export the project for platform '%s'.\n"
+"Export templates seem to be missing or invalid."
+msgstr ""
+
+#: editor/project_export.cpp
+msgid ""
+"Failed to export the project for platform '%s'.\n"
+"This might be due to a configuration issue in the export preset or your "
+"export settings."
 msgstr ""
 
 #: editor/project_export.cpp
@@ -6783,6 +7204,14 @@ msgstr ""
 
 #: editor/project_export.cpp
 msgid "Exporting All"
+msgstr ""
+
+#: editor/project_export.cpp
+msgid "The given export path doesn't exist:"
+msgstr ""
+
+#: editor/project_export.cpp
+msgid "Export templates for this platform are missing/corrupted:"
 msgstr ""
 
 #: editor/project_export.cpp
@@ -7014,6 +7443,38 @@ msgid "Browse"
 msgstr ""
 
 #: editor/project_manager.cpp
+msgid "Renderer:"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 3.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Higher visual quality\n"
+"All features available\n"
+"Incompatible with older hardware\n"
+"Not recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 2.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Lower visual quality\n"
+"Some features not available\n"
+"Works on most hardware\n"
+"Recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "Renderer can be changed later, but scenes may need to be adjusted."
+msgstr ""
+
+#: editor/project_manager.cpp
 msgid "Unnamed Project"
 msgstr ""
 
@@ -7023,6 +7484,19 @@ msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Are you sure to open more than one project?"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"The following project settings file does not specify the version of Godot "
+"through which it was created.\n"
+"\n"
+"%s\n"
+"\n"
+"If you proceed with opening it, it will be converted to Godot's current "
+"configuration file format.\n"
+"Warning: You will not be able to open the project with previous versions of "
+"the engine anymore."
 msgstr ""
 
 #: editor/project_manager.cpp
@@ -7710,6 +8184,22 @@ msgid "Duplicate Node(s)"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
+msgid "Can't reparent nodes in inherited scenes, order of nodes can't change."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Node must belong to the edited scene to become root."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Instantiated scenes can't become root"
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Make node as Root"
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
 msgid "Delete Node(s)?"
 msgstr ""
 
@@ -7741,6 +8231,10 @@ msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Make Local"
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "New Scene Root"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
@@ -8157,6 +8651,18 @@ msgid "Set From Tree"
 msgstr ""
 
 #: editor/settings_config_dialog.cpp
+msgid "Erase Shortcut"
+msgstr ""
+
+#: editor/settings_config_dialog.cpp
+msgid "Restore Shortcut"
+msgstr ""
+
+#: editor/settings_config_dialog.cpp
+msgid "Change Shortcut"
+msgstr ""
+
+#: editor/settings_config_dialog.cpp
 msgid "Shortcuts"
 msgstr ""
 
@@ -8362,6 +8868,10 @@ msgid "GridMap Duplicate Selection"
 msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
+msgid "GridMap Paint"
+msgstr ""
+
+#: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Grid Map"
 msgstr ""
 
@@ -8496,10 +9006,6 @@ msgstr ""
 
 #: modules/mono/editor/mono_bottom_panel.cpp
 msgid "Build Project"
-msgstr ""
-
-#: modules/mono/editor/mono_bottom_panel.cpp
-msgid "Warnings"
 msgstr ""
 
 #: modules/mono/editor/mono_bottom_panel.cpp
@@ -8661,10 +9167,6 @@ msgid "Change Expression"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-msgid "Add Node"
-msgstr ""
-
-#: modules/visual_script/visual_script_editor.cpp
 msgid "Remove VisualScript Nodes"
 msgstr ""
 
@@ -8744,6 +9246,10 @@ msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Change Input Value"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Resize Comment"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
@@ -8892,6 +9398,89 @@ msgstr ""
 msgid "Set %s"
 msgstr ""
 
+#: platform/android/export/export.cpp
+msgid "Package name is missing."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Package segments must be of non-zero length."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' is not allowed in Android application package names."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "A digit cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The package must have at least one '.' separator."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "ADB executable not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "OpenJDK jarsigner not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Debug keystore not configured in the Editor Settings nor in the preset."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Invalid public key for APK expansion."
+msgstr ""
+
+#: platform/android/export/export.cpp
+#, fuzzy
+msgid "Invalid package name:"
+msgstr "არასწორი ფონტის ზომა."
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier is missing."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier segments must be of non-zero length."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "The character '%s' is not allowed in Identifier."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "A digit cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid ""
+"The character '%s' cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "The Identifier must have at least one '.' separator."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "App Store Team ID not specified - cannot configure the project."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+#, fuzzy
+msgid "Invalid Identifier:"
+msgstr "არასწორი ფონტის ზომა."
+
+#: platform/iphone/export/export.cpp
+msgid "Required icon is not specified in the preset."
+msgstr ""
+
 #: platform/javascript/export/export.cpp
 msgid "Run in Browser"
 msgstr ""
@@ -8922,6 +9511,53 @@ msgstr ""
 
 #: platform/javascript/export/export.cpp
 msgid "Using default boot splash image."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Invalid package unique name."
+msgstr "არასწორი ფონტის ზომა."
+
+#: platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Invalid product GUID."
+msgstr "არასწორი ფონტის ზომა."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Invalid background color."
+msgstr "არასწორი ფონტის ზომა."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr ""
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
 msgstr ""
 
 #: scene/2d/animated_sprite.cpp
@@ -9003,6 +9639,13 @@ msgstr ""
 #: scene/2d/parallax_layer.cpp
 msgid ""
 "ParallaxLayer node only works when set as child of a ParallaxBackground node."
+msgstr ""
+
+#: scene/2d/particles_2d.cpp
+msgid ""
+"GPU-based particles are not supported by the GLES2 video driver.\n"
+"Use the CPUParticles2D node instead. You can use the \"Convert to "
+"CPUParticles\" option for this purpose."
 msgstr ""
 
 #: scene/2d/particles_2d.cpp scene/3d/particles.cpp
@@ -9134,6 +9777,12 @@ msgid ""
 "shape resource for it!"
 msgstr ""
 
+#: scene/3d/collision_shape.cpp
+msgid ""
+"Plane shapes don't work well and will be removed in future versions. Please "
+"don't use them."
+msgstr ""
+
 #: scene/3d/cpu_particles.cpp
 msgid "Nothing is visible because no mesh has been assigned."
 msgstr ""
@@ -9148,6 +9797,12 @@ msgstr ""
 msgid "Plotting Meshes"
 msgstr ""
 
+#: scene/3d/gi_probe.cpp
+msgid ""
+"GIProbes are not supported by the GLES2 video driver.\n"
+"Use a BakedLightmap instead."
+msgstr ""
+
 #: scene/3d/navigation_mesh.cpp
 msgid "A NavigationMesh resource must be set or created for this node to work."
 msgstr ""
@@ -9156,6 +9811,13 @@ msgstr ""
 msgid ""
 "NavigationMeshInstance must be a child or grandchild to a Navigation node. "
 "It only provides navigation data."
+msgstr ""
+
+#: scene/3d/particles.cpp
+msgid ""
+"GPU-based particles are not supported by the GLES2 video driver.\n"
+"Use the CPUParticles node instead. You can use the \"Convert to CPUParticles"
+"\" option for this purpose."
 msgstr ""
 
 #: scene/3d/particles.cpp
@@ -9174,13 +9836,9 @@ msgid "PathFollow only works when set as a child of a Path node."
 msgstr ""
 
 #: scene/3d/path.cpp
-msgid "OrientedPathFollow only works when set as a child of a Path node."
-msgstr ""
-
-#: scene/3d/path.cpp
 msgid ""
-"OrientedPathFollow requires \"Up Vector\" enabled in its parent Path's Curve "
-"resource."
+"PathFollow ROTATION_ORIENTED requires \"Up Vector\" enabled in its parent "
+"Path's Curve resource."
 msgstr ""
 
 #: scene/3d/physics_body.cpp
@@ -9192,21 +9850,6 @@ msgstr ""
 
 #: scene/3d/remote_transform.cpp
 msgid "Path property must point to a valid Spatial node to work."
-msgstr ""
-
-#: scene/3d/scenario_fx.cpp
-msgid "WorldEnvironment needs an Environment resource."
-msgstr ""
-
-#: scene/3d/scenario_fx.cpp
-msgid ""
-"Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
-msgstr ""
-
-#: scene/3d/scenario_fx.cpp
-msgid ""
-"This WorldEnvironment is ignored. Either add a Camera (for 3D scenes) or set "
-"this environment's Background Mode to Canvas (for 2D scenes)."
 msgstr ""
 
 #: scene/3d/soft_body.cpp
@@ -9230,6 +9873,21 @@ msgstr ""
 msgid ""
 "VehicleWheel serves to provide a wheel system to a VehicleBody. Please use "
 "it as a child of a VehicleBody."
+msgstr ""
+
+#: scene/3d/world_environment.cpp
+msgid "WorldEnvironment needs an Environment resource."
+msgstr ""
+
+#: scene/3d/world_environment.cpp
+msgid ""
+"Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
+msgstr ""
+
+#: scene/3d/world_environment.cpp
+msgid ""
+"This WorldEnvironment is ignored. Either add a Camera (for 3D scenes) or set "
+"this environment's Background Mode to Canvas (for 2D scenes)."
 msgstr ""
 
 #: scene/animation/animation_blend_tree.cpp
@@ -9277,11 +9935,27 @@ msgid "This node has been deprecated. Use AnimationTree instead."
 msgstr ""
 
 #: scene/gui/color_picker.cpp
+msgid "Pick a color from the screen."
+msgstr ""
+
+#: scene/gui/color_picker.cpp
 msgid "Raw Mode"
 msgstr ""
 
 #: scene/gui/color_picker.cpp
-msgid "Add current color as a preset"
+msgid "Switch between hexadecimal and code values."
+msgstr ""
+
+#: scene/gui/color_picker.cpp
+msgid "Add current color as a preset."
+msgstr ""
+
+#: scene/gui/container.cpp
+msgid ""
+"Container by itself serves no purpose unless a script configures it's "
+"children placement behavior.\n"
+"If you dont't intend to add a script, then please use a plain 'Control' node "
+"instead."
 msgstr ""
 
 #: scene/gui/dialogs.cpp
@@ -9290,6 +9964,10 @@ msgstr ""
 
 #: scene/gui/dialogs.cpp
 msgid "Please Confirm..."
+msgstr ""
+
+#: scene/gui/file_dialog.cpp
+msgid "Go to parent folder."
 msgstr ""
 
 #: scene/gui/popup.cpp
@@ -9365,6 +10043,16 @@ msgstr ""
 msgid "Varyings can only be assigned in vertex function."
 msgstr ""
 
+#~ msgid "Line:"
+#~ msgstr "ხაზი:"
+
+#~ msgid "Col:"
+#~ msgstr "სვეტი:"
+
+#, fuzzy
+#~ msgid "Remove Split"
+#~ msgstr "მონიშვნის მოშორება"
+
 #, fuzzy
 #~ msgid "Zoom out"
 #~ msgstr "ზუმის დაპატარავება"
@@ -9423,12 +10111,6 @@ msgstr ""
 
 #~ msgid "Out-In"
 #~ msgstr "გარედან-შიგნით"
-
-#~ msgid "Change Anim Len"
-#~ msgstr "ანიმ სიგრძის შეცვლა"
-
-#~ msgid "Change Anim Loop"
-#~ msgstr "ანიმ ლუპის შეცვლა"
 
 #~ msgid "Anim Create Typed Value Key"
 #~ msgstr "ანიმაციის ტიპირებული გასაღების შექმნა"

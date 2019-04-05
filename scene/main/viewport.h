@@ -221,12 +221,11 @@ private:
 
 	} physics_last_mouse_state;
 
-	void _collision_object_input_event(CollisionObject *p_object, Camera *p_camera, const Ref<InputEvent> &p_input_event, const Vector3 &p_pos, const Vector3 &p_normal, int p_shape, bool p_discard_empty_motion);
+	void _collision_object_input_event(CollisionObject *p_object, Camera *p_camera, const Ref<InputEvent> &p_input_event, const Vector3 &p_pos, const Vector3 &p_normal, int p_shape);
 
 	bool handle_input_locally;
 	bool local_input_handled;
 
-	void _test_new_mouseover(ObjectID new_collider);
 	Map<ObjectID, uint64_t> physics_2d_mouseover;
 
 	Ref<World2D> world_2d;
@@ -305,6 +304,8 @@ private:
 	bool disable_input;
 
 	void _gui_call_input(Control *p_control, const Ref<InputEvent> &p_input);
+	void _gui_call_notification(Control *p_control, int p_what);
+
 	void _gui_prepare_subwindows();
 	void _gui_sort_subwindows();
 	void _gui_sort_roots();
@@ -383,9 +384,12 @@ private:
 
 	void _drop_mouse_focus();
 
+	void _update_canvas_items(Node *p_node);
+
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
+	virtual void _validate_property(PropertyInfo &property) const;
 
 public:
 	Listener *get_listener() const;
@@ -401,6 +405,7 @@ public:
 	bool is_audio_listener_2d() const;
 
 	void set_size(const Size2 &p_size);
+	void update_canvas_items();
 
 	Size2 get_size() const;
 	Rect2 get_visible_rect() const;

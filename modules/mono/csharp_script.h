@@ -82,10 +82,7 @@ class CSharpScript : public Script {
 
 	Set<Object *> instances;
 
-#ifdef DEBUG_ENABLED
-	Set<ObjectID> pending_reload_instances;
-#endif
-
+#ifdef GD_MONO_HOT_RELOAD
 	struct StateBackup {
 		// TODO
 		// Replace with buffer containing the serialized state of managed scripts.
@@ -93,8 +90,8 @@ class CSharpScript : public Script {
 		List<Pair<StringName, Variant> > properties;
 	};
 
-#ifdef TOOLS_ENABLED
-	Map<ObjectID, CSharpScript::StateBackup> pending_reload_state;
+	Set<ObjectID> pending_reload_instances;
+	Map<ObjectID, StateBackup> pending_reload_state;
 #endif
 
 	String source;
@@ -115,6 +112,7 @@ class CSharpScript : public Script {
 	Map<StringName, Variant> exported_members_defval_cache; // member_default_values_cache
 	Set<PlaceHolderScriptInstance *> placeholders;
 	bool source_changed_cache;
+	bool placeholder_fallback_enabled;
 	bool exports_invalidated;
 	void _update_exports_values(Map<StringName, Variant> &values, List<PropertyInfo> &propnames);
 	virtual void _placeholder_erased(PlaceHolderScriptInstance *p_placeholder);
@@ -129,7 +127,7 @@ class CSharpScript : public Script {
 
 	bool _update_exports();
 #ifdef TOOLS_ENABLED
-	bool _get_member_export(GDMonoClass *p_class, GDMonoClassMember *p_member, PropertyInfo &r_prop_info, bool &r_exported);
+	bool _get_member_export(GDMonoClass *p_class, IMonoClassMember *p_member, PropertyInfo &r_prop_info, bool &r_exported);
 #endif
 
 	CSharpInstance *_create_instance(const Variant **p_args, int p_argcount, Object *p_owner, bool p_isref, Variant::CallError &r_error);
@@ -137,7 +135,7 @@ class CSharpScript : public Script {
 
 	// Do not use unless you know what you are doing
 	friend void GDMonoInternals::tie_managed_to_unmanaged(MonoObject *, Object *);
-	static Ref<CSharpScript> create_for_managed_type(GDMonoClass *p_class);
+	static Ref<CSharpScript> create_for_managed_type(GDMonoClass *p_class, GDMonoClass *p_native);
 
 protected:
 	static void _bind_methods();
@@ -164,7 +162,7 @@ public:
 	virtual bool has_script_signal(const StringName &p_signal) const;
 	virtual void get_script_signal_list(List<MethodInfo> *r_signals) const;
 
-	/* TODO */ virtual bool get_property_default_value(const StringName &p_property, Variant &r_value) const;
+	virtual bool get_property_default_value(const StringName &p_property, Variant &r_value) const;
 	virtual void get_script_property_list(List<PropertyInfo> *p_list) const;
 	virtual void update_exports();
 
@@ -179,6 +177,10 @@ public:
 	MethodInfo get_method_info(const StringName &p_method) const;
 
 	virtual int get_member_line(const StringName &p_member) const;
+
+#ifdef TOOLS_ENABLED
+	virtual bool is_placeholder_fallback_enabled() const { return placeholder_fallback_enabled; }
+#endif
 
 	Error load_source_code(const String &p_path);
 
@@ -204,8 +206,15 @@ class CSharpInstance : public ScriptInstance {
 	Ref<MonoGCHandle> gchandle;
 
 	bool _reference_owner_unsafe();
+
+	/*
+	 * If true is returned, the caller must memdelete the script instance's owner.
+	 */
 	bool _unreference_owner_unsafe();
 
+	/*
+	 * If NULL is returned, the caller must destroy the script instance by removing it from its owner.
+	 */
 	MonoObject *_internal_new_managed();
 
 	// Do not use unless you know what you are doing
@@ -214,12 +223,14 @@ class CSharpInstance : public ScriptInstance {
 
 	void _call_multilevel(MonoObject *p_mono_object, const StringName &p_method, const Variant **p_args, int p_argcount);
 
-	MultiplayerAPI::RPCMode _member_get_rpc_mode(GDMonoClassMember *p_member) const;
+	MultiplayerAPI::RPCMode _member_get_rpc_mode(IMonoClassMember *p_member) const;
 
 public:
 	MonoObject *get_mono_object() const;
 
 	_FORCE_INLINE_ bool is_destructing_script_instance() { return destructing_script_instance; }
+
+	virtual Object *get_owner();
 
 	virtual bool set(const StringName &p_name, const Variant &p_value);
 	virtual bool get(const StringName &p_name, Variant &r_ret) const;
@@ -233,7 +244,12 @@ public:
 	virtual void call_multilevel_reversed(const StringName &p_method, const Variant **p_args, int p_argcount);
 
 	void mono_object_disposed(MonoObject *p_obj);
-	void mono_object_disposed_baseref(MonoObject *p_obj, bool p_is_finalizer, bool &r_owner_deleted);
+
+	/*
+	 * If 'r_delete_owner' is set to true, the caller must memdelete the script instance's owner. Otherwise, if
+	 * 'r_remove_script_instance' is set to true, the caller must destroy the script instance by removing it from its owner.
+	 */
+	void mono_object_disposed_baseref(MonoObject *p_obj, bool p_is_finalizer, bool &r_delete_owner, bool &r_remove_script_instance);
 
 	virtual void refcount_incremented();
 	virtual bool refcount_decremented();
@@ -253,6 +269,7 @@ public:
 };
 
 struct CSharpScriptBinding {
+	bool inited;
 	StringName type_name;
 	GDMonoClass *wrapper_class;
 	Ref<MonoGCHandle> gchandle;
@@ -292,8 +309,18 @@ class CSharpLanguage : public ScriptLanguage {
 
 	Dictionary scripts_metadata;
 
+	// For debug_break and debug_break_parse
+	int _debug_parse_err_line;
+	String _debug_parse_err_file;
+	String _debug_error;
+
+	friend class GDMono;
+	void _uninitialize_script_bindings();
+
 public:
 	StringNameCache string_names;
+
+	Mutex *get_language_bind_mutex() { return language_bind_mutex; }
 
 	_FORCE_INLINE_ int get_language_index() { return lang_idx; }
 	void set_language_index(int p_idx);
@@ -308,7 +335,7 @@ public:
 	bool debug_break(const String &p_error, bool p_allow_continue = true);
 	bool debug_break_parse(const String &p_file, int p_line, const String &p_error);
 
-#ifdef TOOLS_ENABLED
+#ifdef GD_MONO_HOT_RELOAD
 	bool is_assembly_reloading_needed();
 	void reload_assemblies(bool p_soft_reload);
 #endif
@@ -346,11 +373,11 @@ public:
 	/* TODO */ virtual void add_global_constant(const StringName &p_variable, const Variant &p_value) {}
 
 	/* DEBUGGER FUNCTIONS */
-	/* TODO */ virtual String debug_get_error() const { return ""; }
-	/* TODO */ virtual int debug_get_stack_level_count() const { return 1; }
-	/* TODO */ virtual int debug_get_stack_level_line(int p_level) const { return 1; }
-	/* TODO */ virtual String debug_get_stack_level_function(int p_level) const { return ""; }
-	/* TODO */ virtual String debug_get_stack_level_source(int p_level) const { return ""; }
+	virtual String debug_get_error() const;
+	virtual int debug_get_stack_level_count() const;
+	virtual int debug_get_stack_level_line(int p_level) const;
+	virtual String debug_get_stack_level_function(int p_level) const;
+	virtual String debug_get_stack_level_source(int p_level) const;
 	/* TODO */ virtual void debug_get_stack_level_locals(int p_level, List<String> *p_locals, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {}
 	/* TODO */ virtual void debug_get_stack_level_members(int p_level, List<String> *p_members, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {}
 	/* TODO */ virtual void debug_get_globals(List<String> *p_locals, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {}
@@ -388,6 +415,9 @@ public:
 	virtual void free_instance_binding_data(void *p_data);
 	virtual void refcount_incremented_instance_binding(Object *p_object);
 	virtual bool refcount_decremented_instance_binding(Object *p_object);
+
+	Map<Object *, CSharpScriptBinding>::Element *insert_script_binding(Object *p_object, const CSharpScriptBinding &p_script_binding);
+	bool setup_csharp_script_binding(CSharpScriptBinding &r_script_binding, Object *p_object);
 
 #ifdef DEBUG_ENABLED
 	Vector<StackInfo> stack_trace_get_info(MonoObject *p_stack_trace);

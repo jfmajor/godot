@@ -37,8 +37,8 @@
 #include "core/os/rw_lock.h"
 #include "core/os/thread_safe.h"
 #include "core/resource.h"
-#include "scene/resources/color_ramp.h"
 #include "scene/resources/curve.h"
+#include "scene/resources/gradient.h"
 #include "servers/visual_server.h"
 
 /**
@@ -111,6 +111,7 @@ private:
 	Size2 size_override;
 	float lossy_storage_quality;
 	mutable Ref<BitMap> alpha_cache;
+	bool image_stored;
 
 protected:
 	virtual void reload_from_file();
@@ -186,7 +187,7 @@ public:
 	};
 
 private:
-	Error _load_data(const String &p_path, int &tw, int &th, int &flags, Ref<Image> &image, int p_size_limit = 0);
+	Error _load_data(const String &p_path, int &tw, int &th, int &tw_custom, int &th_custom, int &flags, Ref<Image> &image, int p_size_limit = 0);
 	String path_to_file;
 	RID texture;
 	Image::Format format;
@@ -202,6 +203,7 @@ private:
 
 protected:
 	static void _bind_methods();
+	void _validate_property(PropertyInfo &property) const;
 
 public:
 	typedef void (*TextureFormatRequestCallback)(const Ref<StreamTexture> &);

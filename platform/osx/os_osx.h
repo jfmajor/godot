@@ -34,7 +34,7 @@
 #include "core/os/input.h"
 #include "crash_handler_osx.h"
 #include "drivers/coreaudio/audio_driver_coreaudio.h"
-#include "drivers/coremidi/core_midi.h"
+#include "drivers/coremidi/midi_driver_coremidi.h"
 #include "drivers/unix/os_unix.h"
 #include "joypad_osx.h"
 #include "main/input_default.h"
@@ -43,8 +43,11 @@
 #include "servers/visual/rasterizer.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "servers/visual_server.h"
+
+#include <AppKit/AppKit.h>
 #include <AppKit/NSCursor.h>
 #include <ApplicationServices/ApplicationServices.h>
+#include <CoreVideo/CoreVideo.h>
 
 #undef CursorShape
 /**
@@ -102,10 +105,13 @@ public:
 	id window_view;
 	id autoreleasePool;
 	id cursor;
-	id pixelFormat;
-	id context;
+	NSOpenGLPixelFormat *pixelFormat;
+	NSOpenGLContext *context;
 
 	bool layered_window;
+	bool waiting_for_vsync;
+	NSCondition *vsync_condition;
+	CVDisplayLinkRef displayLink;
 
 	CursorShape cursor_shape;
 	NSCursor *cursors[CURSOR_MAX];
@@ -127,7 +133,7 @@ public:
 	String im_text;
 	Point2 im_selection;
 
-	power_osx *power_manager;
+	PowerOSX *power_manager;
 
 	CrashHandler crash_handler;
 

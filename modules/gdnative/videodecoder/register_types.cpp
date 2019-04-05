@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,18 +33,18 @@
 #include "core/class_db.h"
 #include "video_stream_gdnative.h"
 
-static ResourceFormatLoaderVideoStreamGDNative *resource_loader_vsgdnative = NULL;
+static Ref<ResourceFormatLoaderVideoStreamGDNative> resource_loader_vsgdnative;
 
 void register_videodecoder_types() {
 
-	resource_loader_vsgdnative = memnew(ResourceFormatLoaderVideoStreamGDNative);
+	resource_loader_vsgdnative.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_vsgdnative, true);
+
 	ClassDB::register_class<VideoStreamGDNative>();
 }
 
 void unregister_videodecoder_types() {
 
-	if (resource_loader_vsgdnative) {
-		memdelete(resource_loader_vsgdnative);
-	}
+	ResourceLoader::remove_resource_format_loader(resource_loader_vsgdnative);
+	resource_loader_vsgdnative.unref();
 }

@@ -449,7 +449,9 @@ void Camera::set_doppler_tracking(DopplerTracking p_tracking) {
 	doppler_tracking = p_tracking;
 	if (p_tracking != DOPPLER_TRACKING_DISABLED) {
 		velocity_tracker->set_track_physics_step(doppler_tracking == DOPPLER_TRACKING_PHYSICS_STEP);
-		velocity_tracker->reset(get_global_transform().origin);
+		if (is_inside_tree()) {
+			velocity_tracker->reset(get_global_transform().origin);
+		}
 	}
 	_update_camera_mode();
 }
@@ -495,6 +497,7 @@ void Camera::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_keep_aspect_mode"), &Camera::get_keep_aspect_mode);
 	ClassDB::bind_method(D_METHOD("set_doppler_tracking", "mode"), &Camera::set_doppler_tracking);
 	ClassDB::bind_method(D_METHOD("get_doppler_tracking"), &Camera::get_doppler_tracking);
+	ClassDB::bind_method(D_METHOD("get_frustum"), &Camera::get_frustum);
 
 	ClassDB::bind_method(D_METHOD("set_cull_mask_bit", "layer", "enable"), &Camera::set_cull_mask_bit);
 	ClassDB::bind_method(D_METHOD("get_cull_mask_bit", "layer"), &Camera::get_cull_mask_bit);

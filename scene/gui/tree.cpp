@@ -1071,11 +1071,11 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 		int font_ascent = font->get_ascent();
 
 		int ofs = p_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
-		int skip = 0;
+		int skip2 = 0;
 		for (int i = 0; i < columns.size(); i++) {
 
-			if (skip) {
-				skip--;
+			if (skip2) {
+				skip2--;
 				continue;
 			}
 
@@ -1102,7 +1102,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 				while (i + plus < columns.size() && !p_item->cells[i + plus].editable && p_item->cells[i + plus].mode == TreeItem::CELL_MODE_STRING && p_item->cells[i + plus].text == "" && p_item->cells[i + plus].icon.is_null()) {
 					w += get_column_width(i + plus);
 					plus++;
-					skip++;
+					skip2++;
 				}
 			}
 
@@ -1158,16 +1158,15 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 					r.position.x += icon_width;
 					r.size.x -= icon_width;
 				}
-				//r.grow(cache.selected->get_margin(MARGIN_LEFT));
+				p_item->set_meta("__focus_rect", Rect2(r.position, r.size));
 				if (has_focus()) {
 					cache.selected_focus->draw(ci, r);
-					p_item->set_meta("__focus_rect", Rect2(r.position, r.size));
 				} else {
 					cache.selected->draw(ci, r);
 				}
 				if (text_editor->is_visible_in_tree()) {
-					Vector2 ofs(0, (text_editor->get_size().height - r.size.height) / 2);
-					text_editor->set_position(get_global_position() + r.position - ofs);
+					Vector2 ofs2(0, (text_editor->get_size().height - r.size.height) / 2);
+					text_editor->set_position(get_global_position() + r.position - ofs2);
 				}
 			}
 
@@ -1417,12 +1416,15 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 		TreeItem *c = p_item->children;
 
+		int prev_ofs = children_pos.y - cache.offset.y + p_draw_ofs.y;
+
 		while (c) {
 
 			if (cache.draw_relationship_lines > 0 && (!hide_root || c->parent != root)) {
 				int root_ofs = children_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				int parent_ofs = p_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				Point2i root_pos = Point2i(root_ofs, children_pos.y + label_h / 2) - cache.offset + p_draw_ofs;
+
 				if (c->get_children() != NULL)
 					root_pos -= Point2i(cache.arrow->get_width(), 0);
 
@@ -1435,12 +1437,13 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 				if (root_pos.y + line_width >= 0) {
 					VisualServer::get_singleton()->canvas_item_add_line(ci, root_pos, Point2i(parent_pos.x - Math::floor(line_width / 2), root_pos.y), cache.relationship_line_color, line_width);
-					VisualServer::get_singleton()->canvas_item_add_line(ci, Point2i(parent_pos.x, root_pos.y), parent_pos, cache.relationship_line_color, line_width);
+					VisualServer::get_singleton()->canvas_item_add_line(ci, Point2i(parent_pos.x, root_pos.y), Point2i(parent_pos.x, prev_ofs), cache.relationship_line_color, line_width);
 				}
 
 				if (htotal < 0) {
 					return -1;
 				}
+				prev_ofs = root_pos.y;
 			}
 
 			if (htotal >= 0) {
@@ -1602,6 +1605,7 @@ void Tree::_range_click_timeout() {
 		mb.instance();
 		;
 
+		propagate_mouse_activated = false; // done from outside, so signal handler can't clear the tree in the middle of emit (which is a common case)
 		blocked++;
 		propagate_mouse_event(pos + cache.offset, 0, 0, false, root, BUTTON_LEFT, mb);
 		blocked--;
@@ -1614,6 +1618,11 @@ void Tree::_range_click_timeout() {
 
 		if (!click_handled)
 			range_click_timer->stop();
+
+		if (propagate_mouse_activated) {
+			emit_signal("item_activated");
+			propagate_mouse_activated = false;
+		}
 
 	} else {
 		range_click_timer->stop();
@@ -1723,7 +1732,8 @@ int Tree::propagate_mouse_event(const Point2i &p_pos, int x_ofs, int y_ofs, bool
 
 			if (p_doubleclick && (!c.editable || c.mode == TreeItem::CELL_MODE_CUSTOM || c.mode == TreeItem::CELL_MODE_ICON /*|| c.mode==TreeItem::CELL_MODE_CHECK*/)) { //it's confusing for check
 
-				emit_signal("item_activated");
+				propagate_mouse_activated = true;
+
 				incr_search.clear();
 				return -1;
 			}
@@ -2591,6 +2601,7 @@ void Tree::_gui_input(Ref<InputEvent> p_event) {
 
 				click_handled = false;
 				pressing_for_editor = false;
+				propagate_mouse_activated = false;
 
 				blocked++;
 				propagate_mouse_event(pos + cache.offset, 0, 0, b->is_doubleclick(), root, b->get_button_index(), b);
@@ -2626,6 +2637,11 @@ void Tree::_gui_input(Ref<InputEvent> p_event) {
 						if (get_item_at_position(b->get_position()) == NULL && !b->get_shift() && !b->get_control() && !b->get_command())
 							emit_signal("nothing_selected");
 					}
+				}
+
+				if (propagate_mouse_activated) {
+					emit_signal("item_activated");
+					propagate_mouse_activated = false;
 				}
 
 			} break;
@@ -2686,8 +2702,8 @@ bool Tree::edit_selected() {
 		popup_menu->clear();
 		for (int i = 0; i < c.text.get_slice_count(","); i++) {
 
-			String s = c.text.get_slicec(',', i);
-			popup_menu->add_item(s.get_slicec(':', 0), s.get_slicec(':', 1).empty() ? i : s.get_slicec(':', 1).to_int());
+			String s2 = c.text.get_slicec(',', i);
+			popup_menu->add_item(s2.get_slicec(':', 0), s2.get_slicec(':', 1).empty() ? i : s2.get_slicec(':', 1).to_int());
 		}
 
 		popup_menu->set_size(Size2(rect.size.width, 0));
@@ -2939,14 +2955,14 @@ void Tree::_notification(int p_what) {
 		if (show_column_titles) {
 
 			//title buttons
-			int ofs = cache.bg->get_margin(MARGIN_LEFT);
+			int ofs2 = cache.bg->get_margin(MARGIN_LEFT);
 			for (int i = 0; i < columns.size(); i++) {
 
 				Ref<StyleBox> sb = (cache.click_type == Cache::CLICK_TITLE && cache.click_index == i) ? cache.title_button_pressed : ((cache.hover_type == Cache::CLICK_TITLE && cache.hover_index == i) ? cache.title_button_hover : cache.title_button);
 				Ref<Font> f = cache.tb_font;
-				Rect2 tbrect = Rect2(ofs - cache.offset.x, bg->get_margin(MARGIN_TOP), get_column_width(i), tbh);
+				Rect2 tbrect = Rect2(ofs2 - cache.offset.x, bg->get_margin(MARGIN_TOP), get_column_width(i), tbh);
 				sb->draw(ci, tbrect);
-				ofs += tbrect.size.width;
+				ofs2 += tbrect.size.width;
 				//text
 				int clip_w = tbrect.size.width - sb->get_minimum_size().width;
 				f->draw_halign(ci, tbrect.position + Point2i(sb->get_offset().x, (tbrect.size.height - f->get_height()) / 2 + f->get_ascent()), HALIGN_CENTER, clip_w, columns[i].title, cache.title_button_color);
@@ -3945,6 +3961,7 @@ Tree::Tree() {
 	cache.hover_cell = -1;
 
 	allow_reselect = false;
+	propagate_mouse_activated = false;
 }
 
 Tree::~Tree() {

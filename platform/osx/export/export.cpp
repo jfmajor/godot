@@ -425,6 +425,10 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 		}
 	}
 
+	if (!DirAccess::exists(p_path.get_base_dir())) {
+		return ERR_FILE_BAD_PATH;
+	}
+
 	FileAccess *src_f = NULL;
 	zlib_filefunc_def io = zipio_create_io_from_file(&src_f);
 
@@ -749,7 +753,7 @@ bool EditorExportPlatformOSX::can_export(const Ref<EditorExportPreset> &p_preset
 		if (FileAccess::exists(p_preset->get("custom_package/debug"))) {
 			valid = true;
 		} else {
-			err += "Custom debug package not found.\n";
+			err += TTR("Custom debug template not found.") + "\n";
 		}
 	}
 
@@ -757,7 +761,7 @@ bool EditorExportPlatformOSX::can_export(const Ref<EditorExportPreset> &p_preset
 		if (FileAccess::exists(p_preset->get("custom_package/release"))) {
 			valid = true;
 		} else {
-			err += "Custom release package not found.\n";
+			err += TTR("Custom release template not found.") + "\n";
 		}
 	}
 

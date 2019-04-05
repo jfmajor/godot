@@ -282,7 +282,7 @@ void EditorSettingsDialog::_shortcut_button_pressed(Object *p_item, int p_column
 		if (!sc.is_valid())
 			return; //pointless, there is nothing
 
-		undo_redo->create_action("Erase Shortcut");
+		undo_redo->create_action(TTR("Erase Shortcut"));
 		undo_redo->add_do_method(sc.ptr(), "set_shortcut", Ref<InputEvent>());
 		undo_redo->add_undo_method(sc.ptr(), "set_shortcut", sc->get_shortcut());
 		undo_redo->add_do_method(this, "_update_shortcuts");
@@ -296,7 +296,7 @@ void EditorSettingsDialog::_shortcut_button_pressed(Object *p_item, int p_column
 
 		Ref<InputEvent> original = sc->get_meta("original");
 
-		undo_redo->create_action("Restore Shortcut");
+		undo_redo->create_action(TTR("Restore Shortcut"));
 		undo_redo->add_do_method(sc.ptr(), "set_shortcut", original);
 		undo_redo->add_undo_method(sc.ptr(), "set_shortcut", sc->get_shortcut());
 		undo_redo->add_do_method(this, "_update_shortcuts");
@@ -344,7 +344,7 @@ void EditorSettingsDialog::_press_a_key_confirm() {
 
 	Ref<ShortCut> sc = EditorSettings::get_singleton()->get_shortcut(shortcut_configured);
 
-	undo_redo->create_action("Change Shortcut '" + shortcut_configured + "'");
+	undo_redo->create_action(TTR("Change Shortcut") + " '" + shortcut_configured + "'");
 	undo_redo->add_do_method(sc.ptr(), "set_shortcut", ie);
 	undo_redo->add_undo_method(sc.ptr(), "set_shortcut", sc->get_shortcut());
 	undo_redo->add_do_method(this, "_update_shortcuts");
@@ -375,7 +375,8 @@ void EditorSettingsDialog::_focus_current_search_box() {
 }
 
 void EditorSettingsDialog::_editor_restart() {
-	EditorNode::get_singleton()->save_all_scenes_and_restart();
+	EditorNode::get_singleton()->save_all_scenes();
+	EditorNode::get_singleton()->restart_editor();
 }
 
 void EditorSettingsDialog::_editor_restart_request() {

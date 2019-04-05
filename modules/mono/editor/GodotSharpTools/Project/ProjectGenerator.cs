@@ -21,6 +21,7 @@ namespace GodotSharpTools.Project
             mainGroup.AddProperty("DocumentationFile", Path.Combine("$(OutputPath)", "$(AssemblyName).xml"));
             mainGroup.SetProperty("RootNamespace", "Godot");
             mainGroup.SetProperty("ProjectGuid", CoreApiProjectGuid);
+            mainGroup.SetProperty("BaseIntermediateOutputPath", "obj");
 
             GenAssemblyInfoFile(root, dir, CoreApiProjectName,
                                 new string[] { "[assembly: InternalsVisibleTo(\"" + EditorApiProjectName + "\")]" },
@@ -46,6 +47,7 @@ namespace GodotSharpTools.Project
             mainGroup.AddProperty("DocumentationFile", Path.Combine("$(OutputPath)", "$(AssemblyName).xml"));
             mainGroup.SetProperty("RootNamespace", "Godot");
             mainGroup.SetProperty("ProjectGuid", EditorApiProjectGuid);
+            mainGroup.SetProperty("BaseIntermediateOutputPath", "obj");
 
             GenAssemblyInfoFile(root, dir, EditorApiProjectName);
 
@@ -138,6 +140,9 @@ namespace GodotSharpTools.Project
 
         public static ProjectRootElement CreateLibraryProject(string name, out ProjectPropertyGroupElement mainGroup)
         {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException($"{nameof(name)} cannot be empty", nameof(name));
+
             var root = ProjectRootElement.Create();
             root.DefaultTargets = "Build";
 
@@ -147,7 +152,7 @@ namespace GodotSharpTools.Project
             mainGroup.AddProperty("ProjectGuid", "{" + Guid.NewGuid().ToString().ToUpper() + "}");
             mainGroup.AddProperty("OutputType", "Library");
             mainGroup.AddProperty("OutputPath", Path.Combine("bin", "$(Configuration)"));
-            mainGroup.AddProperty("RootNamespace", name);
+            mainGroup.AddProperty("RootNamespace", IdentifierUtils.SanitizeQualifiedIdentifier(name, allowEmptyIdentifiers: true));
             mainGroup.AddProperty("AssemblyName", name);
             mainGroup.AddProperty("TargetFrameworkVersion", "v4.5");
 

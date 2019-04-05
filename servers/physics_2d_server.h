@@ -289,6 +289,7 @@ public:
 		SPACE_PARAM_BODY_ANGULAR_VELOCITY_SLEEP_THRESHOLD,
 		SPACE_PARAM_BODY_TIME_TO_SLEEP,
 		SPACE_PARAM_CONSTRAINT_DEFAULT_BIAS,
+		SPACE_PARAM_TEST_MOTION_MIN_CONTACT_DEPTH,
 	};
 
 	virtual void space_set_param(RID p_space, SpaceParameter p_param, real_t p_value) = 0;
@@ -398,7 +399,7 @@ public:
 	virtual Variant body_get_shape_metadata(RID p_body, int p_shape_idx) const = 0;
 
 	virtual void body_set_shape_disabled(RID p_body, int p_shape, bool p_disabled) = 0;
-	virtual void body_set_shape_as_one_way_collision(RID p_body, int p_shape, bool p_enabled) = 0;
+	virtual void body_set_shape_as_one_way_collision(RID p_body, int p_shape, bool p_enabled, float p_margin = 0) = 0;
 
 	virtual void body_remove_shape(RID p_body, int p_shape_idx) = 0;
 	virtual void body_clear_shapes(RID p_body) = 0;
@@ -504,6 +505,12 @@ public:
 		RID collider;
 		int collider_shape;
 		Variant collider_metadata;
+
+		MotionResult() {
+			collision_local_shape = 0;
+			collider_shape = 0;
+			collider_id = 0;
+		}
 	};
 
 	virtual bool body_test_motion(RID p_body, const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia, float p_margin = 0.001, MotionResult *r_result = NULL, bool p_exclude_raycast_shapes = true) = 0;

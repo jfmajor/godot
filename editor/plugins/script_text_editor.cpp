@@ -273,18 +273,12 @@ void ScriptTextEditor::_set_theme_for_script() {
 	}
 }
 
-void ScriptTextEditor::_toggle_warning_pannel(const Ref<InputEvent> &p_event) {
-	Ref<InputEventMouseButton> mb = p_event;
-	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
-		warnings_panel->set_visible(!warnings_panel->is_visible());
-	}
+void ScriptTextEditor::_show_warnings_panel(bool p_show) {
+	warnings_panel->set_visible(p_show);
 }
 
-void ScriptTextEditor::_error_pressed(const Ref<InputEvent> &p_event) {
-	Ref<InputEventMouseButton> mb = p_event;
-	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
-		code_editor->goto_error();
-	}
+void ScriptTextEditor::_error_pressed() {
+	code_editor->goto_error();
 }
 
 void ScriptTextEditor::_warning_clicked(Variant p_line) {
@@ -468,7 +462,7 @@ void ScriptTextEditor::_validate_script() {
 		}
 	}
 
-	code_editor->get_warning_count_label()->set_text(itos(warnings.size()));
+	code_editor->set_warning_nb(warnings.size());
 	warnings_panel->clear();
 	warnings_panel->push_table(3);
 	for (List<ScriptLanguage::Warning>::Element *E = warnings.front(); E; E = E->next()) {
@@ -626,7 +620,9 @@ void ScriptTextEditor::_lookup_symbol(const String &p_symbol, int p_row, int p_c
 	}
 
 	ScriptLanguage::LookupResult result;
-	if (p_symbol.is_resource_file()) {
+	if (ScriptServer::is_global_class(p_symbol)) {
+		EditorNode::get_singleton()->load_resource(ScriptServer::get_global_class_path(p_symbol));
+	} else if (p_symbol.is_resource_file()) {
 		List<String> scene_extensions;
 		ResourceLoader::get_recognized_extensions_for_type("PackedScene", &scene_extensions);
 
@@ -1107,7 +1103,7 @@ void ScriptTextEditor::_bind_methods() {
 	ClassDB::bind_method("_goto_line", &ScriptTextEditor::_goto_line);
 	ClassDB::bind_method("_lookup_symbol", &ScriptTextEditor::_lookup_symbol);
 	ClassDB::bind_method("_text_edit_gui_input", &ScriptTextEditor::_text_edit_gui_input);
-	ClassDB::bind_method("_toggle_warning_pannel", &ScriptTextEditor::_toggle_warning_pannel);
+	ClassDB::bind_method("_show_warnings_panel", &ScriptTextEditor::_show_warnings_panel);
 	ClassDB::bind_method("_error_pressed", &ScriptTextEditor::_error_pressed);
 	ClassDB::bind_method("_warning_clicked", &ScriptTextEditor::_warning_clicked);
 	ClassDB::bind_method("_color_changed", &ScriptTextEditor::_color_changed);
@@ -1427,7 +1423,7 @@ ScriptTextEditor::ScriptTextEditor() {
 
 	code_editor = memnew(CodeTextEditor);
 	editor_box->add_child(code_editor);
-	code_editor->add_constant_override("separation", 0);
+	code_editor->add_constant_override("separation", 2);
 	code_editor->set_anchors_and_margins_preset(Control::PRESET_WIDE);
 	code_editor->connect("validate_script", this, "_validate_script");
 	code_editor->connect("load_theme_settings", this, "_load_theme_settings");
@@ -1445,9 +1441,8 @@ ScriptTextEditor::ScriptTextEditor() {
 	warnings_panel->set_focus_mode(FOCUS_CLICK);
 	warnings_panel->hide();
 
-	code_editor->get_error_label()->connect("gui_input", this, "_error_pressed");
-	code_editor->get_warning_label()->connect("gui_input", this, "_toggle_warning_pannel");
-	code_editor->get_warning_count_label()->connect("gui_input", this, "_toggle_warning_pannel");
+	code_editor->connect("error_pressed", this, "_error_pressed");
+	code_editor->connect("show_warnings_panel", this, "_show_warnings_panel");
 	warnings_panel->connect("meta_clicked", this, "_warning_clicked");
 
 	update_settings();

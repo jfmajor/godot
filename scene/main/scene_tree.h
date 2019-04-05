@@ -43,7 +43,6 @@
 	@author Juan Linietsky <reduzio@gmail.com>
 */
 
-class SceneTree;
 class PackedScene;
 class Node;
 class Viewport;
@@ -153,6 +152,7 @@ private:
 	Size2i stretch_min;
 	real_t stretch_shrink;
 
+	void _update_font_oversampling(float p_ratio);
 	void _update_root_rect();
 
 	List<ObjectID> delete_queue;

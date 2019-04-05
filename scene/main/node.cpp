@@ -959,7 +959,9 @@ void Node::set_human_readable_collision_renaming(bool p_enabled) {
 #ifdef TOOLS_ENABLED
 String Node::validate_child_name(Node *p_child) {
 
-	return _generate_serial_child_name(p_child);
+	StringName name = p_child->data.name;
+	_generate_serial_child_name(p_child, name);
+	return name;
 }
 #endif
 
@@ -972,7 +974,9 @@ void Node::_validate_child_name(Node *p_child, bool p_force_human_readable) {
 		//this approach to autoset node names is human readable but very slow
 		//it's turned on while running in the editor
 
-		p_child->data.name = _generate_serial_child_name(p_child);
+		StringName name = p_child->data.name;
+		_generate_serial_child_name(p_child, name);
+		p_child->data.name = name;
 
 	} else {
 
@@ -1034,68 +1038,92 @@ String increase_numeric_string(const String &s) {
 	return res;
 }
 
-String Node::_generate_serial_child_name(Node *p_child) {
+void Node::_generate_serial_child_name(const Node *p_child, StringName &name) const {
 
-	String name = p_child->data.name;
-
-	if (name == "") {
+	if (name == StringName()) {
+		//no name and a new nade is needed, create one.
 
 		name = p_child->get_class();
 		// Adjust casing according to project setting. The current type name is expected to be in PascalCase.
 		switch (ProjectSettings::get_singleton()->get("node/name_casing").operator int()) {
 			case NAME_CASING_PASCAL_CASE:
 				break;
-			case NAME_CASING_CAMEL_CASE:
-				name[0] = name.to_lower()[0];
-				break;
+			case NAME_CASING_CAMEL_CASE: {
+				String n = name;
+				n[0] = n.to_lower()[0];
+				name = n;
+			} break;
 			case NAME_CASING_SNAKE_CASE:
-				name = name.camelcase_to_underscore(true);
+				name = String(name).camelcase_to_underscore(true);
 				break;
 		}
 	}
 
+	//quickly test if proposed name exists
+	int cc = data.children.size(); //children count
+	const Node *const *children_ptr = data.children.ptr();
+
+	{
+
+		bool exists = false;
+
+		for (int i = 0; i < cc; i++) {
+			if (children_ptr[i] == p_child) { //exclude self in renaming if its already a child
+				continue;
+			}
+			if (children_ptr[i]->data.name == name) {
+				exists = true;
+			}
+		}
+
+		if (!exists) {
+			return; //if it does not exist, it does not need validation
+		}
+	}
+
 	// Extract trailing number
+	String name_string = name;
 	String nums;
-	for (int i = name.length() - 1; i >= 0; i--) {
-		CharType n = name[i];
+	for (int i = name_string.length() - 1; i >= 0; i--) {
+		CharType n = name_string[i];
 		if (n >= '0' && n <= '9') {
-			nums = String::chr(name[i]) + nums;
+			nums = String::chr(name_string[i]) + nums;
 		} else {
 			break;
 		}
 	}
 
 	String nnsep = _get_name_num_separator();
-	int name_last_index = name.length() - nnsep.length() - nums.length();
+	int name_last_index = name_string.length() - nnsep.length() - nums.length();
 
 	// Assign the base name + separator to name if we have numbers preceded by a separator
-	if (nums.length() > 0 && name.substr(name_last_index, nnsep.length()) == nnsep) {
-		name = name.substr(0, name_last_index + nnsep.length());
+	if (nums.length() > 0 && name_string.substr(name_last_index, nnsep.length()) == nnsep) {
+		name_string = name_string.substr(0, name_last_index + nnsep.length());
 	} else {
 		nums = "";
 	}
 
-	Vector<String> children_names;
-
-	for (int i = 0; i < data.children.size(); i++) {
-		String child_name = data.children[i]->data.name;
-		if (data.children[i] == p_child)
-			continue;
-		if (child_name.begins_with(name)) {
-			children_names.push_back(child_name);
-		}
-	}
-
 	for (;;) {
-		String attempt = name + nums;
+		StringName attempt = name_string + nums;
+		bool exists = false;
 
-		if (children_names.find(attempt) == -1) {
-			return attempt;
+		for (int i = 0; i < cc; i++) {
+			if (children_ptr[i] == p_child) {
+				continue;
+			}
+			if (children_ptr[i]->data.name == attempt) {
+				exists = true;
+			}
+		}
+
+		if (!exists) {
+			name = attempt;
+			return;
 		} else {
 			if (nums.length() == 0) {
 				// Name was undecorated so skip to 2 for a more natural result
 				nums = "2";
-				name += nnsep; // Add separator because nums.length() > 0 was false
+				name_string += nnsep; // Add separator because nums.length() > 0 was false
 			} else {
 				nums = increase_numeric_string(nums);
 			}
@@ -1283,7 +1311,7 @@ Node *Node::_get_child_by_name(const StringName &p_name) const {
 	return NULL;
 }
 
-Node *Node::_get_node(const NodePath &p_path) const {
+Node *Node::get_node_or_null(const NodePath &p_path) const {
 
 	if (!data.inside_tree && p_path.is_absolute()) {
 		ERR_EXPLAIN("Can't use get_node() with absolute paths from outside the active scene tree.");
@@ -1348,7 +1376,7 @@ Node *Node::_get_node(const NodePath &p_path) const {
 
 Node *Node::get_node(const NodePath &p_path) const {
 
-	Node *node = _get_node(p_path);
+	Node *node = get_node_or_null(p_path);
 	if (!node) {
 		ERR_EXPLAIN("Node not found: " + p_path);
 		ERR_FAIL_COND_V(!node, NULL);
@@ -1358,7 +1386,7 @@ Node *Node::get_node(const NodePath &p_path) const {
 
 bool Node::has_node(const NodePath &p_path) const {
 
-	return _get_node(p_path) != NULL;
+	return get_node_or_null(p_path) != NULL;
 }
 
 Node *Node::find_node(const String &p_mask, bool p_recursive, bool p_owned) const {
@@ -2681,6 +2709,7 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_child", "idx"), &Node::get_child);
 	ClassDB::bind_method(D_METHOD("has_node", "path"), &Node::has_node);
 	ClassDB::bind_method(D_METHOD("get_node", "path"), &Node::get_node);
+	ClassDB::bind_method(D_METHOD("get_node_or_null", "path"), &Node::get_node_or_null);
 	ClassDB::bind_method(D_METHOD("get_parent"), &Node::get_parent);
 	ClassDB::bind_method(D_METHOD("find_node", "mask", "recursive", "owned"), &Node::find_node, DEFVAL(true), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("find_parent", "mask"), &Node::find_parent);

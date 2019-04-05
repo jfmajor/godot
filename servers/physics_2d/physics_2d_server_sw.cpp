@@ -36,8 +36,8 @@
 #include "core/project_settings.h"
 #include "core/script_language.h"
 
-#define FLUSH_QUERY_CHECK                                                                                                                        \
-	if (flushing_queries) {                                                                                                                      \
+#define FLUSH_QUERY_CHECK(m_object)                                                                                                              \
+	if (m_object->get_space() && flushing_queries) {                                                                                             \
 		ERR_EXPLAIN("Can't change this state while flushing queries. Use call_deferred() or set_deferred() to change monitoring state instead"); \
 		ERR_FAIL();                                                                                                                              \
 	}
@@ -209,12 +209,14 @@ void Physics2DServerSW::_shape_col_cbk(const Vector2 &p_point_A, const Vector2 &
 			return;
 		cbk->ptr[min_depth_idx * 2 + 0] = p_point_A;
 		cbk->ptr[min_depth_idx * 2 + 1] = p_point_B;
+		cbk->passed++;
 
 	} else {
 
 		cbk->ptr[cbk->amount * 2 + 0] = p_point_A;
 		cbk->ptr[cbk->amount * 2 + 1] = p_point_B;
 		cbk->amount++;
+		cbk->passed++;
 	}
 }
 
@@ -233,6 +235,7 @@ bool Physics2DServerSW::shape_collide(RID p_shape_A, const Transform2D &p_xform_
 	CollCbkData cbk;
 	cbk.max = p_result_max;
 	cbk.amount = 0;
+	cbk.passed = 0;
 	cbk.ptr = r_results;
 
 	bool res = CollisionSolver2DSW::solve(shape_A, p_xform_A, p_motion_A, shape_B, p_xform_B, p_motion_B, _shape_col_cbk, &cbk);
@@ -407,12 +410,11 @@ void Physics2DServerSW::area_set_shape_transform(RID p_area, int p_shape_idx, co
 
 void Physics2DServerSW::area_set_shape_disabled(RID p_area, int p_shape, bool p_disabled) {
 
-	FLUSH_QUERY_CHECK
-
 	Area2DSW *area = area_owner.get(p_area);
 	ERR_FAIL_COND(!area);
-
 	ERR_FAIL_INDEX(p_shape, area->get_shape_count());
+	FLUSH_QUERY_CHECK(area);
+
 	area->set_shape_as_disabled(p_shape, p_disabled);
 }
 
@@ -547,10 +549,9 @@ void Physics2DServerSW::area_set_pickable(RID p_area, bool p_pickable) {
 
 void Physics2DServerSW::area_set_monitorable(RID p_area, bool p_monitorable) {
 
-	FLUSH_QUERY_CHECK
-
 	Area2DSW *area = area_owner.get(p_area);
 	ERR_FAIL_COND(!area);
+	FLUSH_QUERY_CHECK(area);
 
 	area->set_monitorable(p_monitorable);
 }
@@ -627,10 +628,9 @@ RID Physics2DServerSW::body_get_space(RID p_body) const {
 
 void Physics2DServerSW::body_set_mode(RID p_body, BodyMode p_mode) {
 
-	FLUSH_QUERY_CHECK
-
 	Body2DSW *body = body_owner.get(p_body);
 	ERR_FAIL_COND(!body);
+	FLUSH_QUERY_CHECK(body);
 
 	body->set_mode(p_mode);
 };
@@ -731,23 +731,21 @@ void Physics2DServerSW::body_clear_shapes(RID p_body) {
 
 void Physics2DServerSW::body_set_shape_disabled(RID p_body, int p_shape_idx, bool p_disabled) {
 
-	FLUSH_QUERY_CHECK
-
 	Body2DSW *body = body_owner.get(p_body);
 	ERR_FAIL_COND(!body);
-
 	ERR_FAIL_INDEX(p_shape_idx, body->get_shape_count());
+	FLUSH_QUERY_CHECK(body);
 
 	body->set_shape_as_disabled(p_shape_idx, p_disabled);
 }
-void Physics2DServerSW::body_set_shape_as_one_way_collision(RID p_body, int p_shape_idx, bool p_enable) {
+void Physics2DServerSW::body_set_shape_as_one_way_collision(RID p_body, int p_shape_idx, bool p_enable, float p_margin) {
 
 	Body2DSW *body = body_owner.get(p_body);
 	ERR_FAIL_COND(!body);
-
 	ERR_FAIL_INDEX(p_shape_idx, body->get_shape_count());
+	FLUSH_QUERY_CHECK(body);
 
-	body->set_shape_as_one_way_collision(p_shape_idx, p_enable);
+	body->set_shape_as_one_way_collision(p_shape_idx, p_enable, p_margin);
 }
 
 void Physics2DServerSW::body_set_continuous_collision_detection_mode(RID p_body, CCDMode p_mode) {

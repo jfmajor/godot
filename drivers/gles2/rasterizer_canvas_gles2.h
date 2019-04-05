@@ -91,6 +91,9 @@ public:
 		RasterizerStorageGLES2::Texture *current_tex_ptr;
 
 		Transform vp;
+		Light *using_light;
+		bool using_shadow;
+		bool using_transparent_rt;
 
 	} state;
 
@@ -99,6 +102,8 @@ public:
 	RasterizerSceneGLES2 *scene_render;
 
 	RasterizerStorageGLES2 *storage;
+
+	bool use_nvidia_rect_workaround;
 
 	virtual RID light_internal_create();
 	virtual void light_internal_update(RID p_rid, Light *p_light);
@@ -114,6 +119,7 @@ public:
 	_FORCE_INLINE_ void _draw_generic(GLuint p_primitive, int p_vertex_count, const Vector2 *p_vertices, const Vector2 *p_uvs, const Color *p_colors, bool p_singlecolor);
 
 	_FORCE_INLINE_ void _canvas_item_render_commands(Item *p_item, Item *current_clip, bool &reclip, RasterizerStorageGLES2::Material *p_material);
+	void _copy_screen(const Rect2 &p_rect);
 	_FORCE_INLINE_ void _copy_texscreen(const Rect2 &p_rect);
 
 	virtual void canvas_render_items(Item *p_item_list, int p_z, const Color &p_modulate, Light *p_light, const Transform2D &p_base_transform);

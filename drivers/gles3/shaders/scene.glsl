@@ -44,7 +44,7 @@ layout(location = 5) in vec2 uv2_attrib;
 
 #ifdef USE_SKELETON
 layout(location = 6) in uvec4 bone_indices; // attrib:6
-layout(location = 7) in vec4 bone_weights; // attrib:7
+layout(location = 7) in highp vec4 bone_weights; // attrib:7
 #endif
 
 #ifdef USE_INSTANCING
@@ -167,15 +167,61 @@ out vec4 specular_light_interp;
 
 void light_compute(vec3 N, vec3 L, vec3 V, vec3 light_color, float roughness, inout vec3 diffuse, inout vec3 specular) {
 
-	float dotNL = max(dot(N, L), 0.0);
-	diffuse += dotNL * light_color / M_PI;
+	float NdotL = dot(N, L);
+	float cNdotL = max(NdotL, 0.0); // clamped NdotL
+	float NdotV = dot(N, V);
+	float cNdotV = max(NdotV, 0.0);
+
+#if defined(DIFFUSE_OREN_NAYAR)
+	vec3 diffuse_brdf_NL;
+#else
+	float diffuse_brdf_NL; // BRDF times N.L for calculating diffuse radiance
+#endif
+
+#if defined(DIFFUSE_LAMBERT_WRAP)
+	// energy conserving lambert wrap shader
+	diffuse_brdf_NL = max(0.0, (NdotL + roughness) / ((1.0 + roughness) * (1.0 + roughness)));
+
+#elif defined(DIFFUSE_OREN_NAYAR)
+
+	{
+		// see http://mimosa-pudica.net/improved-oren-nayar.html
+		float LdotV = dot(L, V);
+
+		float s = LdotV - NdotL * NdotV;
+		float t = mix(1.0, max(NdotL, NdotV), step(0.0, s));
+
+		float sigma2 = roughness * roughness; // TODO: this needs checking
+		vec3 A = 1.0 + sigma2 * (-0.5 / (sigma2 + 0.33) + 0.17 * diffuse_color / (sigma2 + 0.13));
+		float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+		diffuse_brdf_NL = cNdotL * (A + vec3(B) * s / t) * (1.0 / M_PI);
+	}
+#else
+	// lambert by default for everything else
+	diffuse_brdf_NL = cNdotL * (1.0 / M_PI);
+#endif
+
+	diffuse += light_color * diffuse_brdf_NL;
 
 	if (roughness > 0.0) {
 
+		// D
+		float specular_brdf_NL = 0.0;
+
+#if !defined(SPECULAR_DISABLED)
+		//normalized blinn always unless disabled
 		vec3 H = normalize(V + L);
-		float dotNH = max(dot(N, H), 0.0);
-		float intensity = (roughness >= 1.0 ? 1.0 : pow(dotNH, (1.0 - roughness) * 256.0));
-		specular += light_color * intensity;
+		float cNdotH = max(dot(N, H), 0.0);
+		float cVdotH = max(dot(V, H), 0.0);
+		float cLdotH = max(dot(L, H), 0.0);
+		float shininess = exp2(15.0 * (1.0 - roughness) + 1.0) * 0.25;
+		float blinn = pow(cNdotH, shininess);
+		blinn *= (shininess + 8.0) * (1.0 / (8.0 * M_PI));
+		specular_brdf_NL = (blinn) / max(4.0 * cNdotV * cNdotL, 0.75);
+#endif
+
+		specular += specular_brdf_NL * light_color * (1.0 / M_PI);
 	}
 }
 
@@ -256,6 +302,8 @@ out highp float dp_clip;
 
 #ifdef USE_SKELETON
 uniform highp sampler2D skeleton_texture; // texunit:-1
+uniform highp mat4 skeleton_transform;
+uniform bool skeleton_in_world_coords;
 #endif
 
 out highp vec4 position_interp;
@@ -268,7 +316,7 @@ void main() {
 
 	highp vec4 vertex = vertex_attrib; // vec4(vertex_attrib.xyz * data_attrib.x,1.0);
 
-	mat4 world_matrix = world_transform;
+	highp mat4 world_matrix = world_transform;
 
 #ifdef USE_INSTANCING
 
@@ -349,44 +397,53 @@ void main() {
 		ivec4 bone_indicesi = ivec4(bone_indices); // cast to signed int
 
 		ivec2 tex_ofs = ivec2(bone_indicesi.x % 256, (bone_indicesi.x / 256) * 3);
-		highp mat3x4 m;
-		m = mat3x4(
+		highp mat4 m;
+		m = mat4(
 					texelFetch(skeleton_texture, tex_ofs, 0),
 					texelFetch(skeleton_texture, tex_ofs + ivec2(0, 1), 0),
-					texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0)) *
+					texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0),
+					vec4(0.0, 0.0, 0.0, 1.0)) *
 			bone_weights.x;
 
 		tex_ofs = ivec2(bone_indicesi.y % 256, (bone_indicesi.y / 256) * 3);
 
-		m += mat3x4(
+		m += mat4(
 					 texelFetch(skeleton_texture, tex_ofs, 0),
 					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 1), 0),
-					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0)) *
+					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0),
+					 vec4(0.0, 0.0, 0.0, 1.0)) *
 			 bone_weights.y;
 
 		tex_ofs = ivec2(bone_indicesi.z % 256, (bone_indicesi.z / 256) * 3);
 
-		m += mat3x4(
+		m += mat4(
 					 texelFetch(skeleton_texture, tex_ofs, 0),
 					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 1), 0),
-					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0)) *
+					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0),
+					 vec4(0.0, 0.0, 0.0, 1.0)) *
 			 bone_weights.z;
 
 		tex_ofs = ivec2(bone_indicesi.w % 256, (bone_indicesi.w / 256) * 3);
 
-		m += mat3x4(
+		m += mat4(
 					 texelFetch(skeleton_texture, tex_ofs, 0),
 					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 1), 0),
-					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0)) *
+					 texelFetch(skeleton_texture, tex_ofs + ivec2(0, 2), 0),
+					 vec4(0.0, 0.0, 0.0, 1.0)) *
 			 bone_weights.w;
 
-		mat4 bone_matrix = transpose(mat4(m[0], m[1], m[2], vec4(0.0, 0.0, 0.0, 1.0)));
+		if (skeleton_in_world_coords) {
+			highp mat4 bone_matrix = skeleton_transform * (transpose(m) * inverse(skeleton_transform));
+			world_matrix = bone_matrix * world_matrix;
 
-		world_matrix = bone_matrix * world_matrix;
+		} else {
+
+			world_matrix = world_matrix * transpose(m);
+		}
 	}
 #endif
 
-	mat4 modelview = camera_inverse_matrix * world_matrix;
+	highp mat4 modelview = camera_inverse_matrix * world_matrix;
 	{
 		/* clang-format off */
 
@@ -1473,8 +1530,8 @@ void gi_probe_compute(mediump sampler3D probe, mat4 probe_xform, vec3 bounds, ve
 
 #define MAX_CONE_DIRS 6
 	vec3 cone_dirs[MAX_CONE_DIRS] = vec3[](
-			vec3(0, 0, 1),
-			vec3(0.866025, 0, 0.5),
+			vec3(0.0, 0.0, 1.0),
+			vec3(0.866025, 0.0, 0.5),
 			vec3(0.267617, 0.823639, 0.5),
 			vec3(-0.700629, 0.509037, 0.5),
 			vec3(-0.700629, -0.509037, 0.5),
@@ -1488,10 +1545,10 @@ void gi_probe_compute(mediump sampler3D probe, mat4 probe_xform, vec3 bounds, ve
 #define MAX_CONE_DIRS 4
 
 	vec3 cone_dirs[MAX_CONE_DIRS] = vec3[](
-			vec3(0.707107, 0, 0.707107),
-			vec3(0, 0.707107, 0.707107),
-			vec3(-0.707107, 0, 0.707107),
-			vec3(0, -0.707107, 0.707107));
+			vec3(0.707107, 0.0, 0.707107),
+			vec3(0.0, 0.707107, 0.707107),
+			vec3(-0.707107, 0.0, 0.707107),
+			vec3(0.0, -0.707107, 0.707107));
 
 	float cone_weights[MAX_CONE_DIRS] = float[](0.25, 0.25, 0.25, 0.25);
 	float cone_angle_tan = 0.98269;
@@ -1527,7 +1584,7 @@ void gi_probes_compute(vec3 pos, vec3 normal, float roughness, inout vec3 out_sp
 	vec3 ref_vec = normalize(reflect(normalize(pos), normal));
 
 	//find arbitrary tangent and bitangent, then build a matrix
-	vec3 v0 = abs(normal.z) < 0.999 ? vec3(0, 0, 1) : vec3(0, 1, 0);
+	vec3 v0 = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
 	vec3 tangent = normalize(cross(v0, normal));
 	vec3 bitangent = normalize(cross(tangent, normal));
 	mat3 normal_mat = mat3(tangent, bitangent, normal);
@@ -1915,14 +1972,14 @@ FRAGMENT_SHADER_CODE
 #ifdef USE_LIGHTMAP_CAPTURE
 	{
 		vec3 cone_dirs[12] = vec3[](
-				vec3(0, 0, 1),
-				vec3(0.866025, 0, 0.5),
+				vec3(0.0, 0.0, 1.0),
+				vec3(0.866025, 0.0, 0.5),
 				vec3(0.267617, 0.823639, 0.5),
 				vec3(-0.700629, 0.509037, 0.5),
 				vec3(-0.700629, -0.509037, 0.5),
 				vec3(0.267617, -0.823639, 0.5),
-				vec3(0, 0, -1),
-				vec3(0.866025, 0, -0.5),
+				vec3(0.0, 0.0, -1.0),
+				vec3(0.866025, 0.0, -0.5),
 				vec3(0.267617, 0.823639, -0.5),
 				vec3(-0.700629, 0.509037, -0.5),
 				vec3(-0.700629, -0.509037, -0.5),

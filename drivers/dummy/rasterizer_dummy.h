@@ -241,6 +241,7 @@ public:
 	void textures_keep_original(bool p_enable) {}
 
 	void texture_set_proxy(RID p_proxy, RID p_base) {}
+	virtual Size2 texture_size_with_proxy(RID p_texture) const { return Size2(); }
 	void texture_set_force_redraw_if_visible(RID p_texture, bool p_enable) {}
 
 	/* SKY API */
@@ -460,6 +461,7 @@ public:
 	RID skeleton_create() { return RID(); }
 	void skeleton_allocate(RID p_skeleton, int p_bones, bool p_2d_skeleton = false) {}
 	void skeleton_set_base_transform_2d(RID p_skeleton, const Transform2D &p_base_transform) {}
+	void skeleton_set_world_transform(RID p_skeleton, bool p_enable, const Transform &p_world_transform) {}
 	int skeleton_get_bone_count(RID p_skeleton) const { return 0; }
 	void skeleton_bone_set_transform(RID p_skeleton, int p_bone, const Transform &p_transform) {}
 	Transform skeleton_bone_get_transform(RID p_skeleton, int p_bone) const { return Transform(); }

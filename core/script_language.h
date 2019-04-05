@@ -54,6 +54,7 @@ class ScriptServer {
 	static int _language_count;
 	static bool scripting_enabled;
 	static bool reload_scripts_on_save;
+	static bool languages_finished;
 
 	struct GlobalScriptClass {
 		StringName language;
@@ -86,11 +87,14 @@ public:
 	static StringName get_global_class_language(const StringName &p_class);
 	static String get_global_class_path(const String &p_class);
 	static StringName get_global_class_base(const String &p_class);
+	static StringName get_global_class_native_base(const String &p_class);
 	static void get_global_class_list(List<StringName> *r_global_classes);
 	static void save_global_classes();
 
 	static void init_languages();
 	static void finish_languages();
+
+	static bool are_languages_finished() { return languages_finished; }
 };
 
 class ScriptInstance;
@@ -146,6 +150,8 @@ public:
 	virtual void get_constants(Map<StringName, Variant> *p_constants) {}
 	virtual void get_members(Set<StringName> *p_constants) {}
 
+	virtual bool is_placeholder_fallback_enabled() const { return false; }
+
 	Script() {}
 };
 
@@ -199,6 +205,8 @@ public:
 	static ScriptCodeCompletionCache *get_singleton() { return singleton; }
 
 	ScriptCodeCompletionCache();
+
+	virtual ~ScriptCodeCompletionCache() {}
 };
 
 class ScriptLanguage {
@@ -331,10 +339,9 @@ class PlaceHolderScriptInstance : public ScriptInstance {
 	Object *owner;
 	List<PropertyInfo> properties;
 	Map<StringName, Variant> values;
+	Map<StringName, Variant> constants;
 	ScriptLanguage *language;
 	Ref<Script> script;
-
-	bool build_failed;
 
 public:
 	virtual bool set(const StringName &p_name, const Variant &p_value);
@@ -361,13 +368,10 @@ public:
 
 	void update(const List<PropertyInfo> &p_properties, const Map<StringName, Variant> &p_values); //likely changed in editor
 
-	void set_build_failed(bool p_build_failed) { build_failed = p_build_failed; }
-	bool get_build_failed() const { return build_failed; }
-
 	virtual bool is_placeholder() const { return true; }
 
-	virtual void property_set_fallback(const StringName &p_name, const Variant &p_value, bool *r_valid);
-	virtual Variant property_get_fallback(const StringName &p_name, bool *r_valid);
+	virtual void property_set_fallback(const StringName &p_name, const Variant &p_value, bool *r_valid = NULL);
+	virtual Variant property_get_fallback(const StringName &p_name, bool *r_valid = NULL);
 
 	virtual MultiplayerAPI::RPCMode get_rpc_mode(const StringName &p_method) const { return MultiplayerAPI::RPC_MODE_DISABLED; }
 	virtual MultiplayerAPI::RPCMode get_rset_mode(const StringName &p_variable) const { return MultiplayerAPI::RPC_MODE_DISABLED; }

@@ -47,7 +47,7 @@
 #include "core/io/packet_peer_udp.h"
 #include "core/io/pck_packer.h"
 #include "core/io/resource_format_binary.h"
-#include "core/io/resource_import.h"
+#include "core/io/resource_importer.h"
 #include "core/io/stream_peer_ssl.h"
 #include "core/io/tcp_server.h"
 #include "core/io/translation_loader_po.h"
@@ -68,8 +68,8 @@
 static Ref<ResourceFormatSaverBinary> resource_saver_binary;
 static Ref<ResourceFormatLoaderBinary> resource_loader_binary;
 static Ref<ResourceFormatImporter> resource_format_importer;
-
 static Ref<ResourceFormatLoaderImage> resource_format_image;
+static Ref<TranslationLoaderPO> resource_format_po;
 
 static _ResourceLoader *_resource_loader = NULL;
 static _ResourceSaver *_resource_saver = NULL;
@@ -77,7 +77,6 @@ static _OS *_os = NULL;
 static _Engine *_engine = NULL;
 static _ClassDB *_classdb = NULL;
 static _Marshalls *_marshalls = NULL;
-static Ref<TranslationLoaderPO> resource_format_po;
 static _JSON *_json = NULL;
 
 static IP *ip = NULL;
@@ -100,6 +99,7 @@ void register_core_types() {
 	_global_mutex = Mutex::create();
 
 	StringName::setup();
+	ResourceLoader::initialize();
 
 	register_global_constants();
 	register_variant_methods();
@@ -143,6 +143,7 @@ void register_core_types() {
 	ClassDB::register_virtual_class<InputEventGesture>();
 	ClassDB::register_class<InputEventMagnifyGesture>();
 	ClassDB::register_class<InputEventPanGesture>();
+	ClassDB::register_class<InputEventMIDI>();
 
 	ClassDB::register_class<FuncRef>();
 	ClassDB::register_virtual_class<StreamPeer>();
@@ -251,31 +252,25 @@ void unregister_core_types() {
 
 	memdelete(_geometry);
 
-	if (resource_format_image.is_valid()) {
-		ResourceLoader::remove_resource_format_loader(resource_format_image);
-		resource_format_image.unref();
-	}
+	ResourceLoader::remove_resource_format_loader(resource_format_image);
+	resource_format_image.unref();
 
-	if (resource_saver_binary.is_valid()) {
-		ResourceSaver::remove_resource_format_saver(resource_saver_binary);
-		resource_saver_binary.unref();
-	}
+	ResourceSaver::remove_resource_format_saver(resource_saver_binary);
+	resource_saver_binary.unref();
 
-	if (resource_loader_binary.is_valid()) {
-		ResourceLoader::remove_resource_format_loader(resource_loader_binary);
-		resource_loader_binary.unref();
-	}
+	ResourceLoader::remove_resource_format_loader(resource_loader_binary);
+	resource_loader_binary.unref();
 
-	if (resource_format_importer.is_valid()) {
-		ResourceLoader::remove_resource_format_loader(resource_format_importer);
-		resource_format_importer.unref();
-	}
+	ResourceLoader::remove_resource_format_loader(resource_format_importer);
+	resource_format_importer.unref();
 
 	ResourceLoader::remove_resource_format_loader(resource_format_po);
 	resource_format_po.unref();
 
 	if (ip)
 		memdelete(ip);
+
+	ResourceLoader::finalize();
 
 	ObjectDB::cleanup();
 

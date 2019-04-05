@@ -127,7 +127,7 @@
 			<description>
 				Returns the arc tangent of [code]y/x[/code] in radians. Use to get the angle of tangent [code]y/x[/code]. To compute the value, the method takes into account the sign of both arguments in order to determine the quadrant.
 				[codeblock]
-				a = atan(0, -1) # a is 3.141593
+				a = atan2(0, -1) # a is 3.141593
 				[/codeblock]
 			</description>
 		</method>
@@ -539,7 +539,7 @@
 			</description>
 		</method>
 		<method name="lerp">
-			<return type="float">
+			<return type="Variant">
 			</return>
 			<argument index="0" name="from" type="Variant">
 			</argument>
@@ -549,8 +549,11 @@
 			</argument>
 			<description>
 				Linearly interpolates between two values by a normalized value.
+				If the [code]from[/code] and [code]to[/code] arguments are of type [int] or [float], the return value is a [float].
+				If both are of the same vector type ([Vector2], [Vector3] or [Color]), the return value will be of the same type ([code]lerp[/code] then calls the vector type's [code]linear_interpolate[/code] method).
 				[codeblock]
-				lerp(1, 3, 0.5) # returns 2
+				lerp(0, 4, 0.75) # returns 3.0
+				lerp(Vector2(1, 5), Vector2(3, 2), 0.5) # returns Vector2(2, 3.5)
 				[/codeblock]
 			</description>
 		</method>
@@ -808,7 +811,7 @@
 			<description>
 				Random range, any floating point value between [code]from[/code] and [code]to[/code].
 				[codeblock]
-				prints(rand_range(0, 1), rand_range(0, 1)) # prints 0.135591 0.405263
+				prints(rand_range(0, 1), rand_range(0, 1)) # prints e.g. 0.135591 0.405263
 				[/codeblock]
 			</description>
 		</method>
@@ -825,9 +828,9 @@
 			<return type="float">
 			</return>
 			<description>
-				Returns a random floating point value between 0 and 1.
+				Returns a random floating point value on the interval [code][0, 1][/code].
 				[codeblock]
-				randf() # returns 0.375671
+				randf() # returns e.g. 0.375671
 				[/codeblock]
 			</description>
 		</method>
@@ -835,11 +838,12 @@
 			<return type="int">
 			</return>
 			<description>
-				Returns a random 32 bit integer. Use remainder to obtain a random value between 0 and N (where N is smaller than 2^32 -1).
+				Returns a random unsigned 32 bit integer. Use remainder to obtain a random value in the interval [code][0, N][/code] (where N is smaller than 2^32 -1).
 				[codeblock]
-				randi() % 20      # returns random number between 0 and 19
-				randi() % 100     # returns random number between 0 and 99
-				randi() % 100 + 1 # returns random number between 1 and 100
+				randi()           # returns random integer between 0 and 2^32 - 1
+				randi() % 20      # returns random integer between 0 and 19
+				randi() % 100     # returns random integer between 0 and 99
+				randi() % 100 + 1 # returns random integer between 1 and 100
 				[/codeblock]
 			</description>
 		</method>

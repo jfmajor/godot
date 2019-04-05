@@ -204,7 +204,12 @@ public:
 		bool cull_disabled;
 		bool used_sss;
 		bool used_screen_texture;
-		bool using_contact_shadows;
+
+		bool used_depth_prepass;
+
+		bool used_depth_texture;
+		bool prepared_depth_texture;
+		bool bound_depth_texture;
 
 		VS::ViewportDebugDraw debug_draw;
 	} state;
@@ -569,10 +574,15 @@ public:
 		float light_params[4]; //spot attenuation, spot angle, specular, shadow enabled
 		float light_clamp[4];
 		float light_shadow_color_contact[4];
-		float shadow_matrix1[16]; //up to here for spot and omni, rest is for directional
-		float shadow_matrix2[16];
-		float shadow_matrix3[16];
-		float shadow_matrix4[16];
+		union {
+			struct {
+				float matrix1[16]; //up to here for spot and omni, rest is for directional
+				float matrix2[16];
+				float matrix3[16];
+				float matrix4[16];
+			};
+			float matrix[4 * 16];
+		} shadow;
 		float shadow_split_offsets[4];
 	};
 
@@ -840,6 +850,9 @@ public:
 	void _blur_effect_buffer();
 	void _render_mrts(Environment *env, const CameraMatrix &p_cam_projection);
 	void _post_process(Environment *env, const CameraMatrix &p_cam_projection);
+
+	void _prepare_depth_texture();
+	void _bind_depth_texture();
 
 	virtual void render_scene(const Transform &p_cam_transform, const CameraMatrix &p_cam_projection, bool p_cam_ortogonal, InstanceBase **p_cull_result, int p_cull_count, RID *p_light_cull_result, int p_light_cull_count, RID *p_reflection_probe_cull_result, int p_reflection_probe_cull_count, RID p_environment, RID p_shadow_atlas, RID p_reflection_atlas, RID p_reflection_probe, int p_reflection_probe_pass);
 	virtual void render_shadow(RID p_light, RID p_shadow_atlas, int p_pass, InstanceBase **p_cull_result, int p_cull_count);

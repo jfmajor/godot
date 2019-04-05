@@ -512,7 +512,7 @@ Ref<EditorExportPreset> ProjectExportDialog::get_current_preset() const {
 	return EditorExport::get_singleton()->get_export_preset(presets->get_current());
 }
 
-void ProjectExportDialog::_export_path_changed(const StringName &p_property, const Variant &p_value) {
+void ProjectExportDialog::_export_path_changed(const StringName &p_property, const Variant &p_value, const String &p_field, bool p_changing) {
 
 	if (updating)
 		return;
@@ -972,10 +972,15 @@ void ProjectExportDialog::_export_project_to_path(const String &p_path) {
 
 	Error err = platform->export_project(current, export_debug->is_pressed(), p_path, 0);
 	if (err != OK) {
-		error_dialog->set_text(TTR("Export templates for this platform are missing/corrupted:") + " " + platform->get_name());
+		if (err == ERR_FILE_NOT_FOUND) {
+			error_dialog->set_text(vformat(TTR("Failed to export the project for platform '%s'.\nExport templates seem to be missing or invalid."), platform->get_name()));
+		} else { // Assume misconfiguration. FIXME: Improve error handling and preset config validation.
+			error_dialog->set_text(vformat(TTR("Failed to export the project for platform '%s'.\nThis might be due to a configuration issue in the export preset or your export settings."), platform->get_name()));
+		}
+
+		ERR_PRINTS(vformat("Failed to export the project for platform '%s'.", platform->get_name()));
 		error_dialog->show();
 		error_dialog->popup_centered_minsize(Size2(300, 80));
-		ERR_PRINT("Failed to export project");
 	}
 }
 
@@ -1007,7 +1012,11 @@ void ProjectExportDialog::_export_all(bool p_debug) {
 
 		Error err = platform->export_project(preset, p_debug, preset->get_export_path(), 0);
 		if (err != OK) {
-			error_dialog->set_text(TTR("Export templates for this platform are missing/corrupted:") + " " + platform->get_name());
+			if (err == ERR_FILE_BAD_PATH) {
+				error_dialog->set_text(TTR("The given export path doesn't exist:") + "\n" + preset->get_export_path().get_base_dir());
+			} else {
+				error_dialog->set_text(TTR("Export templates for this platform are missing/corrupted:") + " " + platform->get_name());
+			}
 			error_dialog->show();
 			error_dialog->popup_centered_minsize(Size2(300, 80));
 			ERR_PRINT("Failed to export project");
@@ -1063,7 +1072,7 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	VBoxContainer *main_vb = memnew(VBoxContainer);
 	add_child(main_vb);
-	HBoxContainer *hbox = memnew(HBoxContainer);
+	HSplitContainer *hbox = memnew(HSplitContainer);
 	main_vb->add_child(hbox);
 	hbox->set_v_size_flags(SIZE_EXPAND_FILL);
 
@@ -1266,7 +1275,6 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_pck_zip->connect("file_selected", this, "_export_pck_zip_selected");
 
 	export_error = memnew(Label);
-	export_error->set_autowrap(true);
 	main_vb->add_child(export_error);
 	export_error->hide();
 	export_error->add_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_color("error_color", "Editor"));
@@ -1298,12 +1306,12 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_project->connect("file_selected", this, "_export_project_to_path");
 	export_project->get_line_edit()->connect("text_changed", this, "_validate_export_path");
 
-	export_debug = memnew(CheckButton);
+	export_debug = memnew(CheckBox);
 	export_debug->set_text(TTR("Export With Debug"));
 	export_debug->set_pressed(true);
 	export_project->get_vbox()->add_child(export_debug);
 
-	export_pck_zip_debug = memnew(CheckButton);
+	export_pck_zip_debug = memnew(CheckBox);
 	export_pck_zip_debug->set_text(TTR("Export With Debug"));
 	export_pck_zip_debug->set_pressed(true);
 	export_pck_zip->get_vbox()->add_child(export_pck_zip_debug);

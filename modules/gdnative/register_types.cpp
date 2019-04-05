@@ -125,8 +125,8 @@ static void actual_discoverer_handler() {
 
 	// Check for removed files
 	if (!changed) {
-		for (int i = 0; i < current_files.size(); i++) {
-			if (!file_paths.has(current_files[i])) {
+		for (int j = 0; j < current_files.size(); j++) {
+			if (!file_paths.has(current_files[j])) {
 				changed = true;
 				break;
 			}
@@ -314,9 +314,9 @@ void register_gdnative_types() {
 	ClassDB::register_class<GDNative>();
 
 	resource_loader_gdnlib.instance();
-	resource_saver_gdnlib.instance();
-
 	ResourceLoader::add_resource_format_loader(resource_loader_gdnlib);
+
+	resource_saver_gdnlib.instance();
 	ResourceSaver::add_resource_format_saver(resource_saver_gdnlib);
 
 	GDNativeCallRegistry::singleton = memnew(GDNativeCallRegistry);
@@ -395,9 +395,9 @@ void unregister_gdnative_types() {
 #endif
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_gdnlib);
-	ResourceSaver::remove_resource_format_saver(resource_saver_gdnlib);
-
 	resource_loader_gdnlib.unref();
+
+	ResourceSaver::remove_resource_format_saver(resource_saver_gdnlib);
 	resource_saver_gdnlib.unref();
 
 	// This is for printing out the sizes of the core types

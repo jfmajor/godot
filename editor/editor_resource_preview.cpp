@@ -155,10 +155,11 @@ void EditorResourcePreview::_generate_preview(Ref<ImageTexture> &r_texture, Ref<
 		r_texture = generated;
 
 		if (r_texture.is_valid() && preview_generators[i]->should_generate_small_preview()) {
-			int small_thumbnail_size = EditorNode::get_singleton()->get_theme_base()->get_icon("Object", "EditorIcons")->get_width(); // Kind of a workaround to retreive the default icon size
+			int small_thumbnail_size = EditorNode::get_singleton()->get_theme_base()->get_icon("Object", "EditorIcons")->get_width(); // Kind of a workaround to retrieve the default icon size
 			small_thumbnail_size *= EDSCALE;
 
 			Ref<Image> small_image = r_texture->get_data();
+			small_image = small_image->duplicate();
 			small_image->resize(small_thumbnail_size, small_thumbnail_size, Image::INTERPOLATE_CUBIC);
 			r_small_texture.instance();
 			r_small_texture->create_from_image(small_image);
@@ -187,6 +188,7 @@ void EditorResourcePreview::_generate_preview(Ref<ImageTexture> &r_texture, Ref<
 
 void EditorResourcePreview::_thread() {
 
+#ifndef SERVER_ENABLED
 	while (!exit) {
 
 		preview_sem->wait();
@@ -312,6 +314,8 @@ void EditorResourcePreview::_thread() {
 			preview_mutex->unlock();
 		}
 	}
+#endif
+	exited = true;
 }
 
 void EditorResourcePreview::queue_edited_resource_preview(const Ref<Resource> &p_res, Object *p_receiver, const StringName &p_receiver_func, const Variant &p_userdata) {
@@ -429,23 +433,38 @@ void EditorResourcePreview::disable_previews() {
     enabled = false;
 }
 
+void EditorResourcePreview::start() {
+	ERR_FAIL_COND(thread);
+	thread = Thread::create(_thread_func, this);
+	exited = false;
+}
+
+void EditorResourcePreview::stop() {
+	if (thread) {
+		exit = true;
+		preview_sem->post();
+		while (!exited) {
+			OS::get_singleton()->delay_usec(10000);
+			VisualServer::get_singleton()->sync(); //sync pending stuff, as thread may be blocked on visual server
+		}
+		Thread::wait_to_finish(thread);
+		memdelete(thread);
+		thread = NULL;
+	}
+}
+
 EditorResourcePreview::EditorResourcePreview() {
+	thread = NULL;
 	singleton = this;
 	preview_mutex = Mutex::create();
 	preview_sem = Semaphore::create();
 	order = 0;
 	exit = false;
-    enabled = true;
-
-	thread = Thread::create(_thread_func, this);
+	exited = false;
 }
 
 EditorResourcePreview::~EditorResourcePreview() {
-
-	exit = true;
-	preview_sem->post();
-	Thread::wait_to_finish(thread);
-	memdelete(thread);
+	stop();
 	memdelete(preview_mutex);
 	memdelete(preview_sem);
 }

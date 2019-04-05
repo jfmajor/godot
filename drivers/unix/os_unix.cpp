@@ -282,7 +282,7 @@ uint64_t OS_Unix::get_ticks_usec() const {
 	uint64_t longtime = mach_absolute_time() * _clock_scale;
 #else
 	// Unchecked return. Static analyzers might complain.
-	// If _setup_clock() succeded, we assume clock_gettime() works.
+	// If _setup_clock() succeeded, we assume clock_gettime() works.
 	struct timespec tv_now = { 0, 0 };
 	clock_gettime(GODOT_CLOCK, &tv_now);
 	uint64_t longtime = ((uint64_t)tv_now.tv_nsec / 1000L) + (uint64_t)tv_now.tv_sec * 1000000L;
@@ -467,6 +467,11 @@ String OS_Unix::get_environment(const String &p_var) const {
 	if (getenv(p_var.utf8().get_data()))
 		return getenv(p_var.utf8().get_data());
 	return "";
+}
+
+bool OS_Unix::set_environment(const String &p_var, const String &p_value) const {
+
+	return setenv(p_var.utf8().get_data(), p_value.utf8().get_data(), /* overwrite: */ true) == 0;
 }
 
 int OS_Unix::get_processor_count() const {

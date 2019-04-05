@@ -271,7 +271,6 @@ void ScrollContainer::_notification(int p_what) {
 			}
 			if (!scroll_v || (!v_scroll->is_visible_in_tree() && c->get_v_size_flags() & SIZE_EXPAND)) {
 				r.position.y = 0;
-				r.size.height = size.height;
 				if (c->get_v_size_flags() & SIZE_EXPAND)
 					r.size.height = MAX(size.height, minsize.height);
 				else
@@ -369,8 +368,10 @@ void ScrollContainer::update_scrollbars() {
 	Ref<StyleBox> sb = get_stylebox("bg");
 	size -= sb->get_minimum_size();
 
-	Size2 hmin = h_scroll->get_combined_minimum_size();
-	Size2 vmin = v_scroll->get_combined_minimum_size();
+	Size2 hmin;
+	Size2 vmin;
+	if (scroll_h) hmin = h_scroll->get_combined_minimum_size();
+	if (scroll_v) vmin = v_scroll->get_combined_minimum_size();
 
 	Size2 min = child_max_size;
 

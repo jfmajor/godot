@@ -83,6 +83,8 @@ private:
 	Container *name_container;
 	Container *path_container;
 	Container *install_path_container;
+	Container *rasterizer_container;
+	Ref<ButtonGroup> rasterizer_button_group;
 	Label *msg;
 	LineEdit *project_path;
 	LineEdit *project_name;
@@ -432,22 +434,22 @@ private:
 
 		if (mode == MODE_RENAME) {
 
-			String dir = _test_path();
-			if (dir == "") {
+			String dir2 = _test_path();
+			if (dir2 == "") {
 				set_message(TTR("Invalid project path (changed anything?)."), MESSAGE_ERROR);
 				return;
 			}
 
 			ProjectSettings *current = memnew(ProjectSettings);
 
-			int err = current->setup(dir, "");
+			int err = current->setup(dir2, "");
 			if (err != OK) {
 				set_message(vformat(TTR("Couldn't load project.godot in project path (error %d). It may be missing or corrupted."), err), MESSAGE_ERROR);
 			} else {
 				ProjectSettings::CustomMap edited_settings;
 				edited_settings["application/config/name"] = project_name->get_text();
 
-				if (current->save_custom(dir.plus_file("project.godot"), edited_settings, Vector<String>(), true) != OK) {
+				if (current->save_custom(dir2.plus_file("project.godot"), edited_settings, Vector<String>(), true) != OK) {
 					set_message(TTR("Couldn't edit project.godot in project path."), MESSAGE_ERROR);
 				}
 			}
@@ -471,6 +473,13 @@ private:
 				if (mode == MODE_NEW) {
 
 					ProjectSettings::CustomMap initial_settings;
+					if (rasterizer_button_group->get_pressed_button()->get_meta("driver_name") == "GLES3") {
+						initial_settings["rendering/quality/driver/driver_name"] = "GLES3";
+					} else {
+						initial_settings["rendering/quality/driver/driver_name"] = "GLES2";
+						initial_settings["rendering/vram_compression/import_etc2"] = false;
+						initial_settings["rendering/vram_compression/import_etc"] = true;
+					}
 					initial_settings["application/config/name"] = project_name->get_text();
 					initial_settings["application/config/icon"] = "res://icon.png";
 					initial_settings["rendering/environment/default_environment"] = "res://default_env.tres";
@@ -687,6 +696,7 @@ public:
 			msg->hide();
 			install_path_container->hide();
 			install_status_rect->hide();
+			rasterizer_container->hide();
 			get_ok()->set_disabled(false);
 
 			ProjectSettings *current = memnew(ProjectSettings);
@@ -738,6 +748,7 @@ public:
 				get_ok()->set_text(TTR("Import & Edit"));
 				name_container->hide();
 				install_path_container->hide();
+				rasterizer_container->hide();
 				project_path->grab_focus();
 
 			} else if (mode == MODE_NEW) {
@@ -746,6 +757,7 @@ public:
 				get_ok()->set_text(TTR("Create & Edit"));
 				name_container->show();
 				install_path_container->hide();
+				rasterizer_container->show();
 				project_name->call_deferred("grab_focus");
 				project_name->call_deferred("select_all");
 
@@ -755,13 +767,14 @@ public:
 				get_ok()->set_text(TTR("Install & Edit"));
 				name_container->hide();
 				install_path_container->hide();
+				rasterizer_container->hide();
 				project_path->grab_focus();
 			}
 
 			_test_path();
 		}
 
-		popup_centered(Size2(500, 0) * EDSCALE);
+		popup_centered_minsize(Size2(500, 0) * EDSCALE);
 	}
 
 	ProjectDialog() {
@@ -839,6 +852,48 @@ public:
 		msg = memnew(Label);
 		msg->set_align(Label::ALIGN_CENTER);
 		vb->add_child(msg);
+
+		// rasterizer selection
+		rasterizer_container = memnew(VBoxContainer);
+		vb->add_child(rasterizer_container);
+		l = memnew(Label);
+		l->set_text(TTR("Renderer:"));
+		rasterizer_container->add_child(l);
+		Container *rshb = memnew(HBoxContainer);
+		rasterizer_container->add_child(rshb);
+		rasterizer_button_group.instance();
+
+		Container *rvb = memnew(VBoxContainer);
+		rvb->set_h_size_flags(SIZE_EXPAND_FILL);
+		rshb->add_child(rvb);
+		Button *rs_button = memnew(CheckBox);
+		rs_button->set_button_group(rasterizer_button_group);
+		rs_button->set_text(TTR("OpenGL ES 3.0"));
+		rs_button->set_meta("driver_name", "GLES3");
+		rs_button->set_pressed(true);
+		rvb->add_child(rs_button);
+		l = memnew(Label);
+		l->set_text(TTR("Higher visual quality\nAll features available\nIncompatible with older hardware\nNot recommended for web games"));
+		rvb->add_child(l);
+
+		rshb->add_child(memnew(VSeparator));
+
+		rvb = memnew(VBoxContainer);
+		rvb->set_h_size_flags(SIZE_EXPAND_FILL);
+		rshb->add_child(rvb);
+		rs_button = memnew(CheckBox);
+		rs_button->set_button_group(rasterizer_button_group);
+		rs_button->set_text(TTR("OpenGL ES 2.0"));
+		rs_button->set_meta("driver_name", "GLES2");
+		rvb->add_child(rs_button);
+		l = memnew(Label);
+		l->set_text(TTR("Lower visual quality\nSome features not available\nWorks on most hardware\nRecommended for web games"));
+		rvb->add_child(l);
+
+		l = memnew(Label);
+		l->set_text(TTR("Renderer can be changed later, but scenes may need to be adjusted."));
+		l->set_align(Label::ALIGN_CENTER);
+		rasterizer_container->add_child(l);
 
 		fdialog = memnew(FileDialog);
 		fdialog->set_access(FileDialog::ACCESS_FILESYSTEM);
@@ -1367,6 +1422,7 @@ void ProjectManager::_on_projects_updated() {
 }
 
 void ProjectManager::_on_project_created(const String &dir) {
+	project_filter->clear();
 	bool has_already = false;
 	for (int i = 0; i < scroll_children->get_child_count(); i++) {
 		HBoxContainer *hb = Object::cast_to<HBoxContainer>(scroll_children->get_child(i));
@@ -1471,6 +1527,13 @@ void ProjectManager::_open_selected_projects_ask() {
 	}
 
 	int config_version = (int)cf->get_value("", "config_version", 0);
+
+	// Check if the config_version property was empty or 0
+	if (config_version == 0) {
+		ask_update_settings->set_text(vformat(TTR("The following project settings file does not specify the version of Godot through which it was created.\n\n%s\n\nIf you proceed with opening it, it will be converted to Godot's current configuration file format.\nWarning: You will not be able to open the project with previous versions of the engine anymore."), conf));
+		ask_update_settings->popup_centered_minsize();
+		return;
+	}
 	// Check if we need to convert project settings from an earlier engine version
 	if (config_version < ProjectSettings::CONFIG_VERSION) {
 		ask_update_settings->set_text(vformat(TTR("The following project settings file was generated by an older engine version, and needs to be converted for this version:\n\n%s\n\nDo you want to convert it?\nWarning: You will not be able to open the project with previous versions of the engine anymore."), conf));
@@ -1833,13 +1896,12 @@ ProjectManager::ProjectManager() {
 	Panel *panel = memnew(Panel);
 	gui_base->add_child(panel);
 	panel->set_anchors_and_margins_preset(Control::PRESET_WIDE);
+	panel->add_style_override("panel", gui_base->get_stylebox("Background", "EditorStyles"));
 
 	VBoxContainer *vb = memnew(VBoxContainer);
 	panel->add_child(vb);
-	vb->set_anchors_and_margins_preset(Control::PRESET_WIDE, Control::PRESET_MODE_MINSIZE, 20 * EDSCALE);
-	vb->set_margin(MARGIN_TOP, 4 * EDSCALE);
-	vb->set_margin(MARGIN_BOTTOM, -4 * EDSCALE);
-	vb->add_constant_override("separation", 15 * EDSCALE);
+	vb->set_anchors_and_margins_preset(Control::PRESET_WIDE, Control::PRESET_MODE_MINSIZE, 8 * EDSCALE);
+	vb->add_constant_override("separation", 8 * EDSCALE);
 
 	String cp;
 	cp += 0xA9;
@@ -1847,11 +1909,9 @@ ProjectManager::ProjectManager() {
 
 	HBoxContainer *top_hb = memnew(HBoxContainer);
 	vb->add_child(top_hb);
-	CenterContainer *ccl = memnew(CenterContainer);
 	Label *l = memnew(Label);
 	l->set_text(VERSION_NAME + String(" - ") + TTR("Project Manager"));
-	ccl->add_child(l);
-	top_hb->add_child(ccl);
+	top_hb->add_child(l);
 	top_hb->add_spacer();
 	l = memnew(Label);
 	String hash = String(VERSION_HASH);
@@ -1998,6 +2058,8 @@ ProjectManager::ProjectManager() {
 	settings_hb->set_h_grow_direction(Control::GROW_DIRECTION_BEGIN);
 
 	language_btn = memnew(OptionButton);
+	language_btn->set_flat(true);
+	language_btn->set_focus_mode(Control::FOCUS_NONE);
 
 	Vector<String> editor_languages;
 	List<PropertyInfo> editor_settings_properties;
@@ -2174,4 +2236,10 @@ ProjectListFilter::ProjectListFilter() {
 	add_child(filter_option);
 
 	has_search_box = false;
+}
+
+void ProjectListFilter::clear() {
+	if (has_search_box) {
+		search_box->clear();
+	}
 }

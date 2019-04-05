@@ -245,6 +245,8 @@ EM_BOOL OS_JavaScript::keydown_callback(int p_event_type, const EmscriptenKeyboa
 		return false;
 	}
 	os->input->parse_input_event(ev);
+	// Resume audio context after input in case autoplay was denied.
+	os->audio_driver_javascript.resume();
 	return true;
 }
 
@@ -335,6 +337,8 @@ EM_BOOL OS_JavaScript::mouse_button_callback(int p_event_type, const EmscriptenM
 	ev->set_button_mask(mask);
 
 	os->input->parse_input_event(ev);
+	// Resume audio context after input in case autoplay was denied.
+	os->audio_driver_javascript.resume();
 	// Prevent multi-click text selection and wheel-click scrolling anchor.
 	// Context menu is prevented through contextmenu event.
 	return true;
@@ -438,6 +442,9 @@ void OS_JavaScript::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_s
 
 		if (texture.is_valid()) {
 			image = texture->get_data();
+			if (image.is_valid()) {
+				image->duplicate();
+			}
 		}
 
 		if (!image.is_valid() && atlas_texture.is_valid()) {
@@ -463,6 +470,8 @@ void OS_JavaScript::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_s
 		image = texture->get_data();
 
 		ERR_FAIL_COND(!image.is_valid());
+
+		image = image->duplicate();
 
 		if (atlas_texture.is_valid())
 			image->crop_from_point(
@@ -663,6 +672,8 @@ EM_BOOL OS_JavaScript::touch_press_callback(int p_event_type, const EmscriptenTo
 
 		os->input->parse_input_event(ev);
 	}
+	// Resume audio context after input in case autoplay was denied.
+	os->audio_driver_javascript.resume();
 	return true;
 }
 
@@ -818,7 +829,7 @@ Error OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, 
 				RasterizerGLES3::make_current();
 				break;
 			} else {
-				if (GLOBAL_GET("rendering/quality/driver/driver_fallback") == "Best") {
+				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2")) {
 					p_video_driver = VIDEO_DRIVER_GLES2;
 					gles3 = false;
 					continue;
@@ -855,8 +866,21 @@ Error OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, 
 	video_driver_index = p_video_driver;
 
 	video_mode = p_desired;
-	// Can't fulfill fullscreen request during start-up due to browser security.
+	// fullscreen_change_callback will correct this if the request is successful.
 	video_mode.fullscreen = false;
+	// Emscripten only attempts fullscreen requests if the user input callback
+	// was registered through one its own functions, so request manually for
+	// start-up fullscreen.
+	if (p_desired.fullscreen) {
+		/* clang-format off */
+		EM_ASM({
+			(canvas.requestFullscreen || canvas.msRequestFullscreen ||
+				canvas.mozRequestFullScreen || canvas.mozRequestFullscreen ||
+				canvas.webkitRequestFullscreen
+			).call(canvas);
+		});
+		/* clang-format on */
+	}
 	/* clang-format off */
 	if (EM_ASM_INT_V({ return Module.resizeCanvasOnStart })) {
 		/* clang-format on */
@@ -962,15 +986,16 @@ bool OS_JavaScript::main_loop_iterate() {
 		if (sync_wait_time < 0) {
 			/* clang-format off */
 			EM_ASM(
-				FS.syncfs(function(err) {
-					if (err) { console.warn('Failed to save IDB file system: ' + err.message); }
+				FS.syncfs(function(error) {
+					if (error) { err('Failed to save IDB file system: ' + error.message); }
 				});
 			);
 			/* clang-format on */
 		}
 	}
 
-	process_joypads();
+	if (emscripten_sample_gamepad_data() == EMSCRIPTEN_RESULT_SUCCESS)
+		process_joypads();
 
 	if (just_exited_fullscreen) {
 		if (window_maximized) {
@@ -1045,16 +1070,6 @@ bool OS_JavaScript::_check_internal_feature_support(const String &p_feature) {
 	if (p_feature == "JavaScript")
 		return true;
 #endif
-
-	EMSCRIPTEN_WEBGL_CONTEXT_HANDLE ctx = emscripten_webgl_get_current_context();
-	// All extensions are already automatically enabled, this function allows
-	// checking WebGL extension support without inline JavaScript
-	if (p_feature == "s3tc")
-		return emscripten_webgl_enable_extension(ctx, "WEBGL_compressed_texture_s3tc_srgb");
-	if (p_feature == "etc")
-		return emscripten_webgl_enable_extension(ctx, "WEBGL_compressed_texture_etc1");
-	if (p_feature == "etc2")
-		return emscripten_webgl_enable_extension(ctx, "WEBGL_compressed_texture_etc");
 
 	return false;
 }

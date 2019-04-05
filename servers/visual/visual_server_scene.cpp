@@ -30,8 +30,9 @@
 
 #include "visual_server_scene.h"
 #include "core/os/os.h"
-#include "visual_server_global.h"
+#include "visual_server_globals.h"
 #include "visual_server_raster.h"
+#include <new>
 /* CAMERA API */
 
 RID VisualServerScene::camera_create() {
@@ -444,6 +445,9 @@ void VisualServerScene::instance_set_base(RID p_instance, RID p_base) {
 
 				InstanceGeometryData *geom = memnew(InstanceGeometryData);
 				instance->base_data = geom;
+				if (instance->base_type == VS::INSTANCE_MESH) {
+					instance->blend_values.resize(VSG::storage->mesh_get_blend_shape_count(p_base));
+				}
 			} break;
 			case VS::INSTANCE_REFLECTION_PROBE: {
 
@@ -573,6 +577,19 @@ void VisualServerScene::instance_set_transform(RID p_instance, const Transform &
 	if (instance->transform == p_transform)
 		return; //must be checked to avoid worst evil
 
+#ifdef DEBUG_ENABLED
+
+	for (int i = 0; i < 4; i++) {
+		const Vector3 &v = i < 3 ? p_transform.basis.elements[i] : p_transform.origin;
+		ERR_FAIL_COND(Math::is_inf(v.x));
+		ERR_FAIL_COND(Math::is_nan(v.x));
+		ERR_FAIL_COND(Math::is_inf(v.y));
+		ERR_FAIL_COND(Math::is_nan(v.y));
+		ERR_FAIL_COND(Math::is_inf(v.z));
+		ERR_FAIL_COND(Math::is_nan(v.z));
+	}
+
+#endif
 	instance->transform = p_transform;
 	_instance_queue_update(instance, true);
 }
@@ -1240,7 +1257,9 @@ void VisualServerScene::_update_instance_lightmap_captures(Instance *p_instance)
 
 	//print_line("update captures for pos: " + p_instance->transform.origin);
 
-	zeromem(p_instance->lightmap_capture_data.ptrw(), 12 * sizeof(Color));
+	for (int i = 0; i < 12; i++)
+		new (&p_instance->lightmap_capture_data.ptrw()[i]) Color;
+
 	//this could use some sort of blending..
 	for (List<Instance *>::Element *E = geom->lightmap_captures.front(); E; E = E->next()) {
 		const PoolVector<RasterizerStorage::LightmapCaptureOctree> *octree = VSG::storage->lightmap_capture_get_octree_ptr(E->get()->base);
@@ -1535,106 +1554,102 @@ bool VisualServerScene::_light_instance_update_shadow(Instance *p_instance, cons
 
 			VS::LightOmniShadowMode shadow_mode = VSG::storage->light_omni_get_shadow_mode(p_instance->base);
 
-			switch (shadow_mode) {
-				case VS::LIGHT_OMNI_SHADOW_DUAL_PARABOLOID: {
+			if (shadow_mode == VS::LIGHT_OMNI_SHADOW_DUAL_PARABOLOID || !VSG::scene_render->light_instances_can_render_shadow_cube()) {
 
-					for (int i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++) {
 
-						//using this one ensures that raster deferred will have it
-
-						float radius = VSG::storage->light_get_param(p_instance->base, VS::LIGHT_PARAM_RANGE);
-
-						float z = i == 0 ? -1 : 1;
-						Vector<Plane> planes;
-						planes.resize(5);
-						planes.write[0] = light_transform.xform(Plane(Vector3(0, 0, z), radius));
-						planes.write[1] = light_transform.xform(Plane(Vector3(1, 0, z).normalized(), radius));
-						planes.write[2] = light_transform.xform(Plane(Vector3(-1, 0, z).normalized(), radius));
-						planes.write[3] = light_transform.xform(Plane(Vector3(0, 1, z).normalized(), radius));
-						planes.write[4] = light_transform.xform(Plane(Vector3(0, -1, z).normalized(), radius));
-
-						int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
-						Plane near_plane(light_transform.origin, light_transform.basis.get_axis(2) * z);
-
-						for (int j = 0; j < cull_count; j++) {
-
-							Instance *instance = instance_shadow_cull_result[j];
-							if (!instance->visible || !((1 << instance->base_type) & VS::INSTANCE_GEOMETRY_MASK) || !static_cast<InstanceGeometryData *>(instance->base_data)->can_cast_shadows) {
-								cull_count--;
-								SWAP(instance_shadow_cull_result[j], instance_shadow_cull_result[cull_count]);
-								j--;
-							} else {
-								if (static_cast<InstanceGeometryData *>(instance->base_data)->material_is_animated) {
-									animated_material_found = true;
-								}
-
-								instance->depth = near_plane.distance_to(instance->transform.origin);
-								instance->depth_layer = 0;
-							}
-						}
-
-						VSG::scene_render->light_instance_set_shadow_transform(light->instance, CameraMatrix(), light_transform, radius, 0, i);
-						VSG::scene_render->render_shadow(light->instance, p_shadow_atlas, i, (RasterizerScene::InstanceBase **)instance_shadow_cull_result, cull_count);
-					}
-				} break;
-				case VS::LIGHT_OMNI_SHADOW_CUBE: {
+					//using this one ensures that raster deferred will have it
 
 					float radius = VSG::storage->light_get_param(p_instance->base, VS::LIGHT_PARAM_RANGE);
-					CameraMatrix cm;
-					cm.set_perspective(90, 1, 0.01, radius);
 
-					for (int i = 0; i < 6; i++) {
+					float z = i == 0 ? -1 : 1;
+					Vector<Plane> planes;
+					planes.resize(5);
+					planes.write[0] = light_transform.xform(Plane(Vector3(0, 0, z), radius));
+					planes.write[1] = light_transform.xform(Plane(Vector3(1, 0, z).normalized(), radius));
+					planes.write[2] = light_transform.xform(Plane(Vector3(-1, 0, z).normalized(), radius));
+					planes.write[3] = light_transform.xform(Plane(Vector3(0, 1, z).normalized(), radius));
+					planes.write[4] = light_transform.xform(Plane(Vector3(0, -1, z).normalized(), radius));
 
-						//using this one ensures that raster deferred will have it
+					int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
+					Plane near_plane(light_transform.origin, light_transform.basis.get_axis(2) * z);
 
-						static const Vector3 view_normals[6] = {
-							Vector3(-1, 0, 0),
-							Vector3(+1, 0, 0),
-							Vector3(0, -1, 0),
-							Vector3(0, +1, 0),
-							Vector3(0, 0, -1),
-							Vector3(0, 0, +1)
-						};
-						static const Vector3 view_up[6] = {
-							Vector3(0, -1, 0),
-							Vector3(0, -1, 0),
-							Vector3(0, 0, -1),
-							Vector3(0, 0, +1),
-							Vector3(0, -1, 0),
-							Vector3(0, -1, 0)
-						};
+					for (int j = 0; j < cull_count; j++) {
 
-						Transform xform = light_transform * Transform().looking_at(view_normals[i], view_up[i]);
-
-						Vector<Plane> planes = cm.get_projection_planes(xform);
-
-						int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
-
-						Plane near_plane(xform.origin, -xform.basis.get_axis(2));
-						for (int j = 0; j < cull_count; j++) {
-
-							Instance *instance = instance_shadow_cull_result[j];
-							if (!instance->visible || !((1 << instance->base_type) & VS::INSTANCE_GEOMETRY_MASK) || !static_cast<InstanceGeometryData *>(instance->base_data)->can_cast_shadows) {
-								cull_count--;
-								SWAP(instance_shadow_cull_result[j], instance_shadow_cull_result[cull_count]);
-								j--;
-							} else {
-								if (static_cast<InstanceGeometryData *>(instance->base_data)->material_is_animated) {
-									animated_material_found = true;
-								}
-								instance->depth = near_plane.distance_to(instance->transform.origin);
-								instance->depth_layer = 0;
+						Instance *instance = instance_shadow_cull_result[j];
+						if (!instance->visible || !((1 << instance->base_type) & VS::INSTANCE_GEOMETRY_MASK) || !static_cast<InstanceGeometryData *>(instance->base_data)->can_cast_shadows) {
+							cull_count--;
+							SWAP(instance_shadow_cull_result[j], instance_shadow_cull_result[cull_count]);
+							j--;
+						} else {
+							if (static_cast<InstanceGeometryData *>(instance->base_data)->material_is_animated) {
+								animated_material_found = true;
 							}
-						}
 
-						VSG::scene_render->light_instance_set_shadow_transform(light->instance, cm, xform, radius, 0, i);
-						VSG::scene_render->render_shadow(light->instance, p_shadow_atlas, i, (RasterizerScene::InstanceBase **)instance_shadow_cull_result, cull_count);
+							instance->depth = near_plane.distance_to(instance->transform.origin);
+							instance->depth_layer = 0;
+						}
 					}
 
-					//restore the regular DP matrix
-					VSG::scene_render->light_instance_set_shadow_transform(light->instance, CameraMatrix(), light_transform, radius, 0, 0);
+					VSG::scene_render->light_instance_set_shadow_transform(light->instance, CameraMatrix(), light_transform, radius, 0, i);
+					VSG::scene_render->render_shadow(light->instance, p_shadow_atlas, i, (RasterizerScene::InstanceBase **)instance_shadow_cull_result, cull_count);
+				}
+			} else { //shadow cube
 
-				} break;
+				float radius = VSG::storage->light_get_param(p_instance->base, VS::LIGHT_PARAM_RANGE);
+				CameraMatrix cm;
+				cm.set_perspective(90, 1, 0.01, radius);
+
+				for (int i = 0; i < 6; i++) {
+
+					//using this one ensures that raster deferred will have it
+
+					static const Vector3 view_normals[6] = {
+						Vector3(-1, 0, 0),
+						Vector3(+1, 0, 0),
+						Vector3(0, -1, 0),
+						Vector3(0, +1, 0),
+						Vector3(0, 0, -1),
+						Vector3(0, 0, +1)
+					};
+					static const Vector3 view_up[6] = {
+						Vector3(0, -1, 0),
+						Vector3(0, -1, 0),
+						Vector3(0, 0, -1),
+						Vector3(0, 0, +1),
+						Vector3(0, -1, 0),
+						Vector3(0, -1, 0)
+					};
+
+					Transform xform = light_transform * Transform().looking_at(view_normals[i], view_up[i]);
+
+					Vector<Plane> planes = cm.get_projection_planes(xform);
+
+					int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
+
+					Plane near_plane(xform.origin, -xform.basis.get_axis(2));
+					for (int j = 0; j < cull_count; j++) {
+
+						Instance *instance = instance_shadow_cull_result[j];
+						if (!instance->visible || !((1 << instance->base_type) & VS::INSTANCE_GEOMETRY_MASK) || !static_cast<InstanceGeometryData *>(instance->base_data)->can_cast_shadows) {
+							cull_count--;
+							SWAP(instance_shadow_cull_result[j], instance_shadow_cull_result[cull_count]);
+							j--;
+						} else {
+							if (static_cast<InstanceGeometryData *>(instance->base_data)->material_is_animated) {
+								animated_material_found = true;
+							}
+							instance->depth = near_plane.distance_to(instance->transform.origin);
+							instance->depth_layer = 0;
+						}
+					}
+
+					VSG::scene_render->light_instance_set_shadow_transform(light->instance, cm, xform, radius, 0, i);
+					VSG::scene_render->render_shadow(light->instance, p_shadow_atlas, i, (RasterizerScene::InstanceBase **)instance_shadow_cull_result, cull_count);
+				}
+
+				//restore the regular DP matrix
+				VSG::scene_render->light_instance_set_shadow_transform(light->instance, CameraMatrix(), light_transform, radius, 0, 0);
 			}
 
 		} break;
@@ -2468,7 +2483,7 @@ void VisualServerScene::_setup_gi_probe(Instance *p_instance) {
 							uint32_t a = uint32_t(alpha_block[x][y]) - min_alpha;
 							//convert range to 3 bits
 							a = int((a * 7.0 / (max_alpha - min_alpha)) + 0.5);
-							a = CLAMP(a, 0, 7); //just to be sure
+							a = MIN(a, 7); //just to be sure
 							a = 7 - a; //because range is inverted in this mode
 							if (a == 0) {
 								//do none, remain
@@ -2904,7 +2919,7 @@ void VisualServerScene::_bake_gi_probe(Instance *p_gi_probe) {
 
 				uint32_t idx = level_cells[j];
 
-				uint32_t r = (uint32_t(local_data[idx].energy[0]) / probe_data->dynamic.bake_dynamic_range) >> 2;
+				uint32_t r2 = (uint32_t(local_data[idx].energy[0]) / probe_data->dynamic.bake_dynamic_range) >> 2;
 				uint32_t g = (uint32_t(local_data[idx].energy[1]) / probe_data->dynamic.bake_dynamic_range) >> 2;
 				uint32_t b = (uint32_t(local_data[idx].energy[2]) / probe_data->dynamic.bake_dynamic_range) >> 2;
 				uint32_t a = (cells[idx].level_alpha >> 8) & 0xFF;
@@ -2912,10 +2927,10 @@ void VisualServerScene::_bake_gi_probe(Instance *p_gi_probe) {
 				uint32_t mm_ofs = sizes[0] * sizes[1] * (local_data[idx].pos[2]) + sizes[0] * (local_data[idx].pos[1]) + (local_data[idx].pos[0]);
 				mm_ofs *= 4; //for RGBA (4 bytes)
 
-				mipmapw[mm_ofs + 0] = uint8_t(CLAMP(r, 0, 255));
-				mipmapw[mm_ofs + 1] = uint8_t(CLAMP(g, 0, 255));
-				mipmapw[mm_ofs + 2] = uint8_t(CLAMP(b, 0, 255));
-				mipmapw[mm_ofs + 3] = uint8_t(CLAMP(a, 0, 255));
+				mipmapw[mm_ofs + 0] = uint8_t(MIN(r2, 255));
+				mipmapw[mm_ofs + 1] = uint8_t(MIN(g, 255));
+				mipmapw[mm_ofs + 2] = uint8_t(MIN(b, 255));
+				mipmapw[mm_ofs + 3] = uint8_t(MIN(a, 255));
 			}
 		}
 	} else if (probe_data->dynamic.compression == RasterizerStorage::GI_PROBE_S3TC) {

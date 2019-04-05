@@ -32,8 +32,8 @@
 #define IMAGE_H
 
 #include "core/color.h"
-#include "core/dvector.h"
 #include "core/math/rect2.h"
+#include "core/pool_vector.h"
 #include "core/resource.h"
 
 /**
@@ -52,13 +52,13 @@ typedef Ref<Image> (*ImageMemLoadFunc)(const uint8_t *p_png, int p_size);
 class Image : public Resource {
 	GDCLASS(Image, Resource);
 
+public:
+	static SavePNGFunc save_png_func;
+
 	enum {
 		MAX_WIDTH = 16384, // force a limit somehow
 		MAX_HEIGHT = 16384 // force a limit somehow
 	};
-
-public:
-	static SavePNGFunc save_png_func;
 
 	enum Format {
 
@@ -223,6 +223,7 @@ public:
 	void resize(int p_width, int p_height, Interpolation p_interpolation = INTERPOLATE_BILINEAR);
 	void shrink_x2();
 	void expand_x2_hq2x();
+	bool is_size_po2() const;
 	/**
 	 * Crop the image to a specific size, if larger, then the image is filled by black
 	 */

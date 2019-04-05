@@ -373,7 +373,7 @@ float AnimationNodeStateMachinePlayback::process(AnimationNodeStateMachine *sm, 
 
 	if (fading_from != StringName()) {
 
-		sm->blend_node(current, sm->states[fading_from].node, p_time, p_seek, 1.0 - fade_blend, AnimationNode::FILTER_IGNORE, false);
+		sm->blend_node(fading_from, sm->states[fading_from].node, p_time, p_seek, 1.0 - fade_blend, AnimationNode::FILTER_IGNORE, false);
 	}
 
 	//guess playback position
@@ -421,7 +421,8 @@ float AnimationNodeStateMachinePlayback::process(AnimationNodeStateMachine *sm, 
 
 			if (sm->transitions[i].from == current && auto_advance) {
 
-				if (sm->transitions[i].transition->get_priority() < priority_best) {
+				if (sm->transitions[i].transition->get_priority() <= priority_best) {
+					priority_best = sm->transitions[i].transition->get_priority();
 					auto_advance_to = i;
 				}
 			}
@@ -439,13 +440,13 @@ float AnimationNodeStateMachinePlayback::process(AnimationNodeStateMachine *sm, 
 
 		bool goto_next = false;
 
-		if (switch_mode == AnimationNodeStateMachineTransition::SWITCH_MODE_IMMEDIATE) {
-			goto_next = fading_from == StringName();
-		} else {
+		if (switch_mode == AnimationNodeStateMachineTransition::SWITCH_MODE_AT_END) {
 			goto_next = next_xfade >= (len_current - pos_current) || loops_current > 0;
 			if (loops_current > 0) {
 				next_xfade = 0;
 			}
+		} else {
+			goto_next = fading_from == StringName();
 		}
 
 		if (goto_next) { //loops should be used because fade time may be too small or zero and animation may have looped

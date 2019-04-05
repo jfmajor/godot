@@ -64,6 +64,7 @@ void CanvasItemMaterial::init_shaders() {
 void CanvasItemMaterial::finish_shaders() {
 
 	memdelete(dirty_materials);
+	memdelete(shader_names);
 	dirty_materials = NULL;
 
 #ifndef NO_THREADS
@@ -130,19 +131,15 @@ void CanvasItemMaterial::_update_shader() {
 
 		code += "\tVERTEX.xy /= vec2(h_frames, v_frames);\n";
 
-		code += "\tint total_frames = particles_anim_h_frames * particles_anim_v_frames;\n";
-		code += "\tint frame = int(float(total_frames) * INSTANCE_CUSTOM.z);\n";
-		code += "\tif (particles_anim_loop) {\n";
-		code += "\t\tframe = abs(frame) % total_frames;\n";
+		code += "\tfloat particle_total_frames = float(particles_anim_h_frames * particles_anim_v_frames);\n";
+		code += "\tfloat particle_frame = floor(INSTANCE_CUSTOM.z * float(particle_total_frames));\n";
+		code += "\tif (!particles_anim_loop) {\n";
+		code += "\t\tparticle_frame = clamp(particle_frame, 0.0, particle_total_frames - 1.0);\n";
 		code += "\t} else {\n";
-		code += "\t\tframe = clamp(frame, 0, total_frames - 1);\n";
-		code += "\t}\n";
-
-		code += "\tfloat frame_w = 1.0 / h_frames;\n";
-		code += "\tfloat frame_h = 1.0 / v_frames;\n";
-		code += "\tUV.x = UV.x * frame_w + frame_w * float(frame % particles_anim_h_frames);\n";
-		code += "\tUV.y = UV.y * frame_h + frame_h * float(frame / particles_anim_h_frames);\n";
-
+		code += "\t\tparticle_frame = mod(particle_frame, particle_total_frames);\n";
+		code += "\t}";
+		code += "\tUV /= vec2(h_frames, v_frames);\n";
+		code += "\tUV += vec2(mod(particle_frame, h_frames) / h_frames, floor(particle_frame / h_frames) / v_frames);\n";
 		code += "}\n";
 	}
 
@@ -433,6 +430,11 @@ void CanvasItem::hide() {
 	_change_notify("visible");
 }
 
+CanvasItem *CanvasItem::current_item_drawn = NULL;
+CanvasItem *CanvasItem::get_current_item_drawn() {
+	return current_item_drawn;
+}
+
 void CanvasItem::_update_callback() {
 
 	if (!is_inside_tree()) {
@@ -448,11 +450,13 @@ void CanvasItem::_update_callback() {
 			first_draw = false;
 		}
 		drawing = true;
+		current_item_drawn = this;
 		notification(NOTIFICATION_DRAW);
 		emit_signal(SceneStringNames::get_singleton()->draw);
 		if (get_script_instance()) {
 			get_script_instance()->call_multilevel_reversed(SceneStringNames::get_singleton()->_draw, NULL, 0);
 		}
+		current_item_drawn = NULL;
 		drawing = false;
 	}
 	//todo updating = false

@@ -200,7 +200,6 @@ private:
 	Control *theme_base;
 	Control *gui_base;
 	VBoxContainer *main_vbox;
-	PanelContainer *play_button_panel;
 	OptionButton *video_driver;
 
 	ConfirmationDialog *video_restart_dialog;
@@ -443,6 +442,8 @@ private:
 	void _show_messages();
 	void _vp_resized();
 
+	int _save_external_resources();
+
 	bool _validate_scene_recursive(const String &p_filename, Node *p_node);
 	void _save_scene(String p_file, int idx = -1);
 	void _save_all_scenes();
@@ -451,7 +452,6 @@ private:
 
 	void _instance_request(const Vector<String> &p_files);
 
-	void _hide_top_editors();
 	void _display_top_editors(bool p_display);
 	void _set_top_editors(Vector<EditorPlugin *> p_editor_plugins_over);
 	void _set_editing_top_editors(Object *p_current_object);
@@ -469,6 +469,8 @@ private:
 	void _open_recent_scene(int p_idx);
 	void _dropped_files(const Vector<String> &p_files, int p_screen);
 	String _recent_scene;
+
+	void _exit_editor();
 
 	bool convert_old;
 
@@ -672,7 +674,9 @@ public:
 
 	void push_item(Object *p_object, const String &p_property = "", bool p_inspector_only = false);
 	void edit_item(Object *p_object);
+	void edit_item_resource(RES p_resource);
 	bool item_has_editor(Object *p_object);
+	void hide_top_editors();
 
 	void open_request(const String &p_path);
 
@@ -780,7 +784,8 @@ public:
 	void add_tool_submenu_item(const String &p_name, PopupMenu *p_submenu);
 	void remove_tool_menu_item(const String &p_name);
 
-	void save_all_scenes_and_restart();
+	void save_all_scenes();
+	void restart_editor();
 
 	void dim_editor(bool p_dimming);
 
@@ -834,6 +839,7 @@ public:
 	void forward_spatial_draw_over_viewport(Control *p_overlay);
 	void forward_spatial_force_draw_over_viewport(Control *p_overlay);
 	void add_plugin(EditorPlugin *p_plugin);
+	void remove_plugin(EditorPlugin *p_plugin);
 	void clear();
 	bool empty();
 

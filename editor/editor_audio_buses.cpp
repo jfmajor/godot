@@ -75,9 +75,16 @@ void EditorAudioBus::_notification(int p_what) {
 
 		disabled_vu = get_icon("BusVuFrozen", "EditorIcons");
 
+		Color solo_color = Color::html(EditorSettings::get_singleton()->is_dark_theme() ? "#ffe337" : "#ffeb70");
+		Color mute_color = Color::html(EditorSettings::get_singleton()->is_dark_theme() ? "#ff2929" : "#ff7070");
+		Color bypass_color = Color::html(EditorSettings::get_singleton()->is_dark_theme() ? "#22ccff" : "#70deff");
+
 		solo->set_icon(get_icon("AudioBusSolo", "EditorIcons"));
+		solo->add_color_override("icon_color_pressed", solo_color);
 		mute->set_icon(get_icon("AudioBusMute", "EditorIcons"));
+		mute->add_color_override("icon_color_pressed", mute_color);
 		bypass->set_icon(get_icon("AudioBusBypass", "EditorIcons"));
+		bypass->add_color_override("icon_color_pressed", bypass_color);
 
 		bus_options->set_icon(get_icon("GuiMiniTabMenu", "EditorIcons"));
 
@@ -358,7 +365,7 @@ void EditorAudioBus::_send_selected(int p_which) {
 	updating_bus = true;
 
 	UndoRedo *ur = EditorNode::get_singleton()->get_undo_redo();
-	ur->create_action("Select Audio Bus Send");
+	ur->create_action(TTR("Select Audio Bus Send"));
 	ur->add_do_method(AudioServer::get_singleton(), "set_bus_send", get_index(), send->get_item_text(p_which));
 	ur->add_undo_method(AudioServer::get_singleton(), "set_bus_send", get_index(), AudioServer::get_singleton()->get_bus_send(get_index()));
 	ur->add_do_method(buses, "_update_bus", get_index());
@@ -378,9 +385,9 @@ void EditorAudioBus::_effect_selected() {
 	if (effect->get_metadata(0) != Variant()) {
 
 		int index = effect->get_metadata(0);
-		Ref<AudioEffect> effect = AudioServer::get_singleton()->get_bus_effect(get_index(), index);
-		if (effect.is_valid()) {
-			EditorNode::get_singleton()->push_item(effect.ptr());
+		Ref<AudioEffect> effect2 = AudioServer::get_singleton()->get_bus_effect(get_index(), index);
+		if (effect2.is_valid()) {
+			EditorNode::get_singleton()->push_item(effect2.ptr());
 		}
 	}
 
@@ -1158,7 +1165,7 @@ EditorAudioBuses::EditorAudioBuses() {
 	add = memnew(Button);
 	top_hb->add_child(add);
 	add->set_text(TTR("Add Bus"));
-	add->set_tooltip(TTR("Create a new Bus Layout."));
+	add->set_tooltip(TTR("Add a new Audio Bus to this layout."));
 
 	add->connect("pressed", this, "_add_bus");
 
